@@ -17,10 +17,12 @@
 // Please email: vagabond @ hginn.co.uk for more details.
 
 #include "SlipGL.h"
+#include "SlipPanel.h"
 #include <QApplication>
 #include <QMouseEvent>
 #include <QKeyEvent>
 #include <QWindow>
+#include <QTimer>
 #include <iostream>
 
 void SlipGL::initializeGL()
@@ -38,16 +40,46 @@ void SlipGL::initializeGL()
 	initialisePrograms();
 }
 
-SlipGL::SlipGL(QWidget *p) : QOpenGLWidget(p)
+SlipGL::SlipGL(QWidget *p, struct detector *d) : QOpenGLWidget(p)
 {
 	/*
 	_timer = new QTimer();
-	_timer->setInterval(20);
-	connect(_timer, &QTimer::timeout, this, &SlipGL::progressAnimations);
+	_timer->setInterval(1);
+	connect(_timer, &QTimer::timeout, this, &SlipGL::update);
 	*/
+	
+	_d = d;
+	
+	const double scale = 0.0008;
+	_model = make_mat3x3();
+	mat3x3_scale(&_model, scale, scale, scale / 4);
+}
+
+void SlipGL::addPanel(struct panel &p)
+{
+	SlipPanel *spanel = new SlipPanel(_d, p);
+	_panels.push_back(spanel);
+}
+
+void SlipGL::preparePanels(int n)
+{
+	_panels.reserve(n);
 }
 
 void SlipGL::initialisePrograms()
 {
+	for (unsigned int i = 0; i < _panels.size(); i++)
+	{
+		_panels[i]->initialisePrograms();
+	}
+}
 
+void SlipGL::paintGL()
+{
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	for (unsigned int i = 0; i < _panels.size(); i++)
+	{
+		_panels[i]->initialisePrograms();
+		_panels[i]->render(this);
+	}
 }

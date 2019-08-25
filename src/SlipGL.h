@@ -22,23 +22,39 @@
 #include <QtWidgets/qopenglwidget.h>
 #include <QtGui/qopengl.h>
 #include <QtGui/qopenglfunctions.h>
+#include <crystfel/detector.h>
+
+#include "mat3x3.h"
+
+class SlipPanel;
 
 class SlipGL : public QOpenGLWidget, QOpenGLFunctions
 {
 	Q_OBJECT
 	
 public:
-	SlipGL(QWidget *parent = NULL);
+	SlipGL(QWidget *parent, struct detector *d = NULL);
 	
+	void preparePanels(int n);
+	void addPanel(struct panel &p);
 	
+	mat3x3 getModel()
+	{
+		return _model;
+	}
 public slots:
 	
 protected:
 	virtual void initializeGL();
+	virtual void paintGL();
 
 private:
 	void initialisePrograms();
+	
+	mat3x3 _model;
+	std::vector<SlipPanel *> _panels;
 
+	struct detector *_d;
 };
 
 

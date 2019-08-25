@@ -11,6 +11,8 @@ moc_files = qt5.preprocess(moc_headers : [
 
 executable('slipnslide', 
 'src/main.cpp', 
+'src/mat3x3.cpp', 
+'src/vec3.cpp', 
 'src/DetectorView.cpp', 
 'src/SlipGL.cpp', 
 'src/SlipPanel.cpp', 

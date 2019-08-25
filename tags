@@ -1,0 +1,214 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+CMAKE_BINARY_DIR	build/current/meson-private/cmake_libcrystfel/Makefile	/^CMAKE_BINARY_DIR = \/home\/ginn\/Software\/slipnslide\/build\/current\/meson-private\/cmake_libcrystfel$/;"	m
+CMAKE_COMMAND	build/current/meson-private/cmake_libcrystfel/Makefile	/^CMAKE_COMMAND = \/usr\/bin\/cmake$/;"	m
+CMAKE_SOURCE_DIR	build/current/meson-private/cmake_libcrystfel/Makefile	/^CMAKE_SOURCE_DIR = \/home\/ginn\/Software\/slipnslide\/build\/current\/meson-private\/cmake_libcrystfel$/;"	m
+DetectorView	src/DetectorView.cpp	/^DetectorView::DetectorView(QWidget *p) : QMainWindow(p)$/;"	f	class:DetectorView
+DetectorView	src/DetectorView.h	/^class DetectorView : public QMainWindow$/;"	c
+EQUALS	build/current/meson-private/cmake_libcrystfel/Makefile	/^EQUALS = =$/;"	m
+QT_MOC_LITERAL	build/current/slipnslide@exe/moc_DetectorView.cpp	27;"	d	file:
+QT_MOC_LITERAL	build/current/slipnslide@exe/moc_DetectorView.cpp	39;"	d	file:
+QT_MOC_LITERAL	build/current/slipnslide@exe/moc_SlipGL.cpp	27;"	d	file:
+QT_MOC_LITERAL	build/current/slipnslide@exe/moc_SlipGL.cpp	39;"	d	file:
+QT_MOC_LITERAL	build/current/slipnslide@exe/moc_SlipPanel.cpp	27;"	d	file:
+QT_MOC_LITERAL	build/current/slipnslide@exe/moc_SlipPanel.cpp	39;"	d	file:
+RM	build/current/meson-private/cmake_libcrystfel/Makefile	/^RM = \/usr\/bin\/cmake -E remove -f$/;"	m
+SHELL	build/current/meson-private/cmake_libcrystfel/Makefile	/^SHELL = \/bin\/sh$/;"	m
+SUFFIXES	build/current/meson-private/cmake_libcrystfel/Makefile	/^SUFFIXES =$/;"	m
+SlipGL	src/SlipGL.cpp	/^SlipGL::SlipGL(QWidget *p) : QOpenGLWidget(p)$/;"	f	class:SlipGL
+SlipGL	src/SlipGL.h	/^class SlipGL : public QOpenGLWidget, QOpenGLFunctions$/;"	c
+SlipObject	src/SlipObject.cpp	/^SlipObject::SlipObject()$/;"	f	class:SlipObject
+SlipObject	src/SlipObject.h	/^class SlipObject : public QOpenGLFunctions$/;"	c
+SlipPanel	src/SlipPanel.cpp	/^SlipPanel::SlipPanel(struct panel &p) : SlipObject()$/;"	f	class:SlipPanel
+SlipPanel	src/SlipPanel.h	/^class SlipPanel : public SlipObject$/;"	c
+Vertex	src/SlipObject.h	/^} Vertex;$/;"	t	typeref:struct:__anon1
+__Blot__Image_fsh__	src/shaders/fImage.h	2;"	d
+__Blot__Image_vsh__	src/shaders/vImage.h	2;"	d
+__Blot__Wipe_fsh__	src/shaders/fWipe.h	2;"	d
+__Slip_SlipObject__	src/SlipObject.h	20;"	d
+__Slip__DetectorView__	src/DetectorView.h	20;"	d
+__Slip__SlipGL__	src/SlipGL.h	20;"	d
+__Slip__SlipPanel__	src/SlipPanel.h	20;"	d
+__blot__charmanip__	src/charmanip.h	7;"	d
+__vagabond__mat3x3__	src/mat3x3.h	10;"	d
+__vagabond__vec3__	src/vec3.h	10;"	d
+_bufferID	src/SlipObject.h	/^	GLuint _bufferID;$/;"	m	class:SlipObject
+_cnz	src/SlipPanel.h	/^	double _cnz;$/;"	m	class:SlipPanel
+_det	src/DetectorView.h	/^	struct detector *_det;$/;"	m	class:DetectorView	typeref:struct:DetectorView::detector
+_disabled	src/SlipObject.h	/^	bool _disabled;$/;"	m	class:SlipObject
+_extra	src/SlipObject.h	/^	bool _extra;$/;"	m	class:SlipObject
+_gl	src/DetectorView.h	/^	SlipGL *_gl;$/;"	m	class:DetectorView
+_ignoreAspectRatio	src/SlipObject.h	/^	bool _ignoreAspectRatio;$/;"	m	class:SlipObject
+_indices	src/SlipObject.h	/^	std::vector<GLuint> _indices;$/;"	m	class:SlipObject
+_model	src/SlipGL.h	/^	mat3x3 _model;$/;"	m	class:SlipGL
+_p	src/SlipPanel.h	/^	struct panel _p;$/;"	m	class:SlipPanel	typeref:struct:SlipPanel::panel
+_panels	src/SlipGL.h	/^	std::vector<SlipPanel *> _panels;$/;"	m	class:SlipGL
+_program	src/SlipObject.h	/^	GLuint _program;$/;"	m	class:SlipObject
+_random	src/SlipObject.h	/^	std::string _random;$/;"	m	class:SlipObject
+_renderType	src/SlipObject.h	/^	GLuint _renderType;$/;"	m	class:SlipObject
+_textures	src/SlipObject.h	/^	std::vector<GLuint> _textures;$/;"	m	class:SlipObject
+_time	src/SlipObject.h	/^	float _time;$/;"	m	class:SlipObject
+_uModel	src/SlipObject.h	/^	GLuint _uModel;$/;"	m	class:SlipObject
+_uTime	src/SlipObject.h	/^	GLuint _uTime;$/;"	m	class:SlipObject
+_vbo	src/SlipObject.h	/^	GLuint _vbo;$/;"	m	class:SlipObject
+_vertices	src/SlipObject.h	/^	std::vector<Vertex> _vertices;$/;"	m	class:SlipObject
+addPanel	src/SlipGL.cpp	/^void SlipGL::addPanel(struct panel &p)$/;"	f	class:SlipGL
+addShaderFromString	src/SlipObject.cpp	/^GLuint SlipObject::addShaderFromString(GLuint program, GLenum type, $/;"	f	class:SlipObject
+addToVertices	src/SlipObject.cpp	/^void SlipObject::addToVertices(float x, float y)$/;"	f	class:SlipObject
+bindTextures	src/SlipObject.cpp	/^void SlipObject::bindTextures()$/;"	f	class:SlipObject
+changeProgram	src/SlipObject.cpp	/^void SlipObject::changeProgram(std::string &v, std::string &f)$/;"	f	class:SlipObject
+checkErrors	src/SlipObject.cpp	/^void SlipObject::checkErrors()$/;"	f	class:SlipObject
+color	src/SlipObject.h	/^	GLfloat color[4];$/;"	m	struct:__anon1
+data	build/current/slipnslide@exe/moc_DetectorView.cpp	/^    QByteArrayData data[1];$/;"	m	struct:qt_meta_stringdata_DetectorView_t	file:
+data	build/current/slipnslide@exe/moc_SlipGL.cpp	/^    QByteArrayData data[1];$/;"	m	struct:qt_meta_stringdata_SlipGL_t	file:
+data	build/current/slipnslide@exe/moc_SlipPanel.cpp	/^    QByteArrayData data[1];$/;"	m	struct:qt_meta_stringdata_SlipPanel_t	file:
+deg2rad	src/mat3x3.cpp	9;"	d	file:
+deletePrograms	src/SlipObject.cpp	/^void SlipObject::deletePrograms()$/;"	f	class:SlipObject
+empty_vec3	src/vec3.cpp	/^struct vec3 empty_vec3()$/;"	f
+ewald_wavelength	src/vec3.cpp	/^double ewald_wavelength(vec3 &index)$/;"	f
+extra	src/SlipObject.h	/^	GLfloat extra[4];$/;"	m	struct:__anon1
+fImage	src/shaders/fImage.h	/^std::string fImage =$/;"	v
+fWipe	src/shaders/fWipe.h	/^std::string fWipe =$/;"	v
+f_to_str	src/charmanip.h	/^inline std::string f_to_str(double val, int precision)$/;"	f
+free_2d_array	src/mat3x3.cpp	/^void free_2d_array(double **values)$/;"	f
+getModel	src/SlipGL.h	/^	mat3x3 getModel()$/;"	f	class:SlipGL
+get_file_contents	src/charmanip.h	/^inline std::string get_file_contents(std::string filename)$/;"	f
+iPointer	src/SlipObject.h	/^	GLuint *iPointer()$/;"	f	class:SlipObject
+iSize	src/SlipObject.h	/^	size_t iSize()$/;"	f	class:SlipObject
+i_to_str	src/charmanip.h	/^inline std::string i_to_str(int val)$/;"	f
+ignoreAspectRatio	src/SlipObject.h	/^	void ignoreAspectRatio(bool ignore = true)$/;"	f	class:SlipObject
+incrementIndent	src/charmanip.h	/^inline void incrementIndent(char **block)$/;"	f
+indent	src/charmanip.h	/^inline std::string indent(int num)$/;"	f
+indexCount	src/SlipObject.h	/^	size_t indexCount()$/;"	f	class:SlipObject
+initialisePrograms	src/SlipGL.cpp	/^void SlipGL::initialisePrograms()$/;"	f	class:SlipGL
+initialisePrograms	src/SlipObject.cpp	/^void SlipObject::initialisePrograms(std::string *v, std::string *f)$/;"	f	class:SlipObject
+initializeGL	src/SlipGL.cpp	/^void SlipGL::initializeGL()$/;"	f	class:SlipGL
+isCovered	src/SlipObject.cpp	/^bool SlipObject::isCovered(double x, double y)$/;"	f	class:SlipObject
+isDisabled	src/SlipObject.h	/^	bool isDisabled()$/;"	f	class:SlipObject
+keywordValue	src/charmanip.h	/^inline char *keywordValue(char *block, char **keyword, char **value) $/;"	f
+main	build/current/meson-private/sanitycheckcpp.cc	/^class breakCCompiler;int main(int argc, char **argv) { return 0; }$/;"	f
+main	src/main.cpp	/^int main(int argc, char *argv[])$/;"	f
+makeDummy	src/SlipObject.cpp	/^void SlipObject::makeDummy()$/;"	f	class:SlipObject
+make_mat3x3	src/mat3x3.cpp	/^struct mat3x3 make_mat3x3()$/;"	f
+make_randomish_axis	src/vec3.cpp	/^vec3 make_randomish_axis()$/;"	f
+make_vec2	src/vec3.h	/^inline vec2 make_vec2(double x, double y)$/;"	f
+make_vec3	src/vec3.h	/^inline vec3 make_vec3(double x, double y, double z)$/;"	f
+mat3x3	src/mat3x3.h	/^struct mat3x3$/;"	s
+mat3x3_abs_sum_all	src/mat3x3.cpp	/^double mat3x3_abs_sum_all(mat3x3 &mat)$/;"	f
+mat3x3_add_mat3x3	src/mat3x3.cpp	/^void mat3x3_add_mat3x3(mat3x3 *alter, mat3x3 &_const)$/;"	f
+mat3x3_axis	src/mat3x3.cpp	/^vec3 mat3x3_axis(mat3x3 &me, int i)$/;"	f
+mat3x3_closest_rot_mat	src/mat3x3.cpp	/^mat3x3 mat3x3_closest_rot_mat(vec3 vec1, vec3 vec2, vec3 axis, $/;"	f
+mat3x3_covariance	src/mat3x3.cpp	/^mat3x3 mat3x3_covariance(std::vector<vec3> points)$/;"	f
+mat3x3_desc	src/mat3x3.cpp	/^std::string mat3x3_desc(mat3x3 mat)$/;"	f
+mat3x3_determinant	src/mat3x3.cpp	/^double mat3x3_determinant(mat3x3 &mat)$/;"	f
+mat3x3_diff_from_identity	src/mat3x3.cpp	/^double mat3x3_diff_from_identity(mat3x3 &mat, double target)$/;"	f
+mat3x3_from_2d_array	src/mat3x3.cpp	/^mat3x3 mat3x3_from_2d_array(double **values)$/;"	f
+mat3x3_from_unit_cell	src/mat3x3.cpp	/^mat3x3 mat3x3_from_unit_cell(double *unitCell)$/;"	f
+mat3x3_from_unit_cell	src/mat3x3.cpp	/^mat3x3 mat3x3_from_unit_cell(double a, double b, double c, double alpha, double beta, double gamma)$/;"	f
+mat3x3_inverse	src/mat3x3.cpp	/^mat3x3 mat3x3_inverse(mat3x3 &mat)$/;"	f
+mat3x3_length	src/mat3x3.cpp	/^double mat3x3_length(mat3x3 &mat, int index)$/;"	f
+mat3x3_make_tensor	src/mat3x3.cpp	/^mat3x3 mat3x3_make_tensor(mat3x3 &tensify, vec3 &lengths)$/;"	f
+mat3x3_malloc_float3x3	src/mat3x3.h	/^inline float *mat3x3_malloc_float3x3(mat3x3 &mat)$/;"	f
+mat3x3_mult_mat3x3	src/mat3x3.cpp	/^mat3x3 mat3x3_mult_mat3x3(struct mat3x3 m1, struct mat3x3 m2)$/;"	f
+mat3x3_mult_scalar	src/mat3x3.cpp	/^void mat3x3_mult_scalar(mat3x3 *mat, double scale)$/;"	f
+mat3x3_mult_vec	src/mat3x3.cpp	/^vec3 mat3x3_mult_vec(struct mat3x3 mat, struct vec3 vec)$/;"	f
+mat3x3_mult_vec	src/mat3x3.h	/^inline void mat3x3_mult_vec(struct mat3x3 mat, struct vec3 *vec)$/;"	f
+mat3x3_ortho_axes	src/mat3x3.cpp	/^mat3x3 mat3x3_ortho_axes(vec3 cVec)$/;"	f
+mat3x3_rhbasis	src/mat3x3.cpp	/^mat3x3 mat3x3_rhbasis(vec3 aVec, vec3 bVec)$/;"	f
+mat3x3_rot_from_angles	src/mat3x3.cpp	/^mat3x3 mat3x3_rot_from_angles(double phi, double psi)$/;"	f
+mat3x3_rotate	src/mat3x3.cpp	/^mat3x3 mat3x3_rotate(double alpha, double beta, double gamma)$/;"	f
+mat3x3_rotation_angle	src/mat3x3.cpp	/^double mat3x3_rotation_angle(mat3x3 &mat)$/;"	f
+mat3x3_rotation_axis	src/mat3x3.cpp	/^vec3 mat3x3_rotation_axis(mat3x3 &mat)$/;"	f
+mat3x3_scale	src/mat3x3.cpp	/^void mat3x3_scale(mat3x3 *inverse, double a, double b, double c)$/;"	f
+mat3x3_subtract_mat3x3	src/mat3x3.cpp	/^mat3x3 mat3x3_subtract_mat3x3(mat3x3 &one, mat3x3 &two)$/;"	f
+mat3x3_to_2d_array	src/mat3x3.cpp	/^void mat3x3_to_2d_array(mat3x3 mat, double ***values)$/;"	f
+mat3x3_trace	src/mat3x3.cpp	/^double mat3x3_trace(mat3x3 &mat)$/;"	f
+mat3x3_transpose	src/mat3x3.cpp	/^mat3x3 mat3x3_transpose(mat3x3 &mat)$/;"	f
+mat3x3_unit_vec_rotation	src/mat3x3.cpp	/^mat3x3 mat3x3_unit_vec_rotation(vec3 axis, double radians)$/;"	f
+mat3x3_vectors_to_unity	src/mat3x3.cpp	/^void mat3x3_vectors_to_unity(mat3x3 *mat)$/;"	f
+mat3x3_volume	src/mat3x3.cpp	/^double mat3x3_volume(mat3x3 mat)$/;"	f
+metaObject	build/current/slipnslide@exe/moc_DetectorView.cpp	/^const QMetaObject *DetectorView::metaObject() const$/;"	f	class:DetectorView
+metaObject	build/current/slipnslide@exe/moc_SlipGL.cpp	/^const QMetaObject *SlipGL::metaObject() const$/;"	f	class:SlipGL
+metaObject	build/current/slipnslide@exe/moc_SlipPanel.cpp	/^const QMetaObject *SlipPanel::metaObject() const$/;"	f	class:SlipPanel
+midpoint	src/SlipObject.cpp	/^void SlipObject::midpoint(double *x, double *y)$/;"	f	class:SlipObject
+normal	src/SlipObject.h	/^	GLfloat normal[3];$/;"	m	struct:__anon1
+paintGL	src/SlipGL.cpp	/^void SlipGL::paintGL()$/;"	f	class:SlipGL
+pos	src/SlipObject.h	/^	GLfloat pos[3];$/;"	m	struct:__anon1
+preparePanels	src/SlipGL.cpp	/^void SlipGL::preparePanels(int n)$/;"	f	class:SlipGL
+qt_meta_data_DetectorView	build/current/slipnslide@exe/moc_DetectorView.cpp	/^static const uint qt_meta_data_DetectorView[] = {$/;"	v	file:
+qt_meta_data_SlipGL	build/current/slipnslide@exe/moc_SlipGL.cpp	/^static const uint qt_meta_data_SlipGL[] = {$/;"	v	file:
+qt_meta_data_SlipPanel	build/current/slipnslide@exe/moc_SlipPanel.cpp	/^static const uint qt_meta_data_SlipPanel[] = {$/;"	v	file:
+qt_meta_stringdata_DetectorView	build/current/slipnslide@exe/moc_DetectorView.cpp	/^static const qt_meta_stringdata_DetectorView_t qt_meta_stringdata_DetectorView = {$/;"	v	file:
+qt_meta_stringdata_DetectorView_t	build/current/slipnslide@exe/moc_DetectorView.cpp	/^struct qt_meta_stringdata_DetectorView_t {$/;"	s	file:
+qt_meta_stringdata_SlipGL	build/current/slipnslide@exe/moc_SlipGL.cpp	/^static const qt_meta_stringdata_SlipGL_t qt_meta_stringdata_SlipGL = {$/;"	v	file:
+qt_meta_stringdata_SlipGL_t	build/current/slipnslide@exe/moc_SlipGL.cpp	/^struct qt_meta_stringdata_SlipGL_t {$/;"	s	file:
+qt_meta_stringdata_SlipPanel	build/current/slipnslide@exe/moc_SlipPanel.cpp	/^static const qt_meta_stringdata_SlipPanel_t qt_meta_stringdata_SlipPanel = {$/;"	v	file:
+qt_meta_stringdata_SlipPanel_t	build/current/slipnslide@exe/moc_SlipPanel.cpp	/^struct qt_meta_stringdata_SlipPanel_t {$/;"	s	file:
+qt_metacall	build/current/slipnslide@exe/moc_DetectorView.cpp	/^int DetectorView::qt_metacall(QMetaObject::Call _c, int _id, void **_a)$/;"	f	class:DetectorView
+qt_metacall	build/current/slipnslide@exe/moc_SlipGL.cpp	/^int SlipGL::qt_metacall(QMetaObject::Call _c, int _id, void **_a)$/;"	f	class:SlipGL
+qt_metacall	build/current/slipnslide@exe/moc_SlipPanel.cpp	/^int SlipPanel::qt_metacall(QMetaObject::Call _c, int _id, void **_a)$/;"	f	class:SlipPanel
+qt_metacast	build/current/slipnslide@exe/moc_DetectorView.cpp	/^void *DetectorView::qt_metacast(const char *_clname)$/;"	f	class:DetectorView
+qt_metacast	build/current/slipnslide@exe/moc_SlipGL.cpp	/^void *SlipGL::qt_metacast(const char *_clname)$/;"	f	class:SlipGL
+qt_metacast	build/current/slipnslide@exe/moc_SlipPanel.cpp	/^void *SlipPanel::qt_metacast(const char *_clname)$/;"	f	class:SlipPanel
+qt_static_metacall	build/current/slipnslide@exe/moc_DetectorView.cpp	/^void DetectorView::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)$/;"	f	class:DetectorView
+qt_static_metacall	build/current/slipnslide@exe/moc_SlipGL.cpp	/^void SlipGL::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)$/;"	f	class:SlipGL
+qt_static_metacall	build/current/slipnslide@exe/moc_SlipPanel.cpp	/^void SlipPanel::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)$/;"	f	class:SlipPanel
+rad2deg	src/mat3x3.cpp	10;"	d	file:
+rebindProgram	src/SlipObject.cpp	/^void SlipObject::rebindProgram()$/;"	f	class:SlipObject
+render	src/SlipObject.cpp	/^void SlipObject::render(SlipGL *sender)$/;"	f	class:SlipObject
+rotateVertices	src/SlipObject.cpp	/^void SlipObject::rotateVertices(double angle)$/;"	f	class:SlipObject
+select	src/SlipObject.cpp	/^void SlipObject::select(bool sel, double red, double green, double blue)$/;"	f	class:SlipObject
+setDetector	src/DetectorView.cpp	/^void DetectorView::setDetector(struct detector *det)$/;"	f	class:DetectorView
+setDisabled	src/SlipObject.cpp	/^void SlipObject::setDisabled(bool dis)$/;"	f	class:SlipObject
+setTime	src/SlipObject.h	/^	void setTime(float time)$/;"	f	class:SlipObject
+setVertices	src/SlipObject.cpp	/^void SlipObject::setVertices(float t, float b, float l, float r)$/;"	f	class:SlipObject
+setZCoord	src/SlipObject.cpp	/^void SlipObject::setZCoord(float z)$/;"	f	class:SlipObject
+setupVertices	src/SlipPanel.cpp	/^void SlipPanel::setupVertices()$/;"	f	class:SlipPanel
+shouldWipe	src/SlipObject.h	/^	bool shouldWipe()$/;"	f	class:SlipObject
+staticMetaObject	build/current/slipnslide@exe/moc_DetectorView.cpp	/^QT_INIT_METAOBJECT const QMetaObject DetectorView::staticMetaObject = {$/;"	m	class:DetectorView	file:
+staticMetaObject	build/current/slipnslide@exe/moc_SlipGL.cpp	/^QT_INIT_METAOBJECT const QMetaObject SlipGL::staticMetaObject = {$/;"	m	class:SlipGL	file:
+staticMetaObject	build/current/slipnslide@exe/moc_SlipPanel.cpp	/^QT_INIT_METAOBJECT const QMetaObject SlipPanel::staticMetaObject = {$/;"	m	class:SlipPanel	file:
+strchrwhite	src/charmanip.h	/^inline char *strchrwhite(char *block)$/;"	f
+stringdata0	build/current/slipnslide@exe/moc_DetectorView.cpp	/^    char stringdata0[13];$/;"	m	struct:qt_meta_stringdata_DetectorView_t	file:
+stringdata0	build/current/slipnslide@exe/moc_SlipGL.cpp	/^    char stringdata0[7];$/;"	m	struct:qt_meta_stringdata_SlipGL_t	file:
+stringdata0	build/current/slipnslide@exe/moc_SlipPanel.cpp	/^    char stringdata0[10];$/;"	m	struct:qt_meta_stringdata_SlipPanel_t	file:
+tex	src/SlipObject.h	/^	GLfloat tex[2];$/;"	m	struct:__anon1
+texture	src/SlipObject.h	/^	GLuint texture(size_t i)$/;"	f	class:SlipObject
+unit_cell_from_mat3x3	src/mat3x3.cpp	/^void unit_cell_from_mat3x3(mat3x3 mat, double *vals)$/;"	f
+vImage	src/shaders/vImage.h	/^std::string vImage =$/;"	v
+vPointer	src/SlipObject.h	/^	Vertex *vPointer()$/;"	f	class:SlipObject
+vSize	src/SlipObject.h	/^	size_t vSize()$/;"	f	class:SlipObject
+vals	src/mat3x3.h	/^	double vals[9];$/;"	m	struct:mat3x3
+vec2	src/vec3.h	/^struct vec2$/;"	s
+vec2_less_vec2	src/vec3.h	/^inline bool vec2_less_vec2(vec2 x, vec2 y)$/;"	f
+vec3	src/vec3.h	/^struct vec3$/;"	s
+vec3_add_to_vec3	src/vec3.h	/^inline void vec3_add_to_vec3(vec3 *bVec, vec3 &aVec)$/;"	f
+vec3_add_vec3	src/vec3.cpp	/^struct vec3 vec3_add_vec3(vec3 &aVec, vec3 &bVec)$/;"	f
+vec3_angle_from_three_points	src/vec3.cpp	/^double vec3_angle_from_three_points(vec3 &aVec, vec3 &bVec, vec3 &cVec)$/;"	f
+vec3_angle_with_vec3	src/vec3.cpp	/^double vec3_angle_with_vec3(vec3 &aVec, vec3 &bVec)$/;"	f
+vec3_cosine_with_vec3	src/vec3.cpp	/^double vec3_cosine_with_vec3(vec3 &aVec, vec3 &bVec)$/;"	f
+vec3_cross_vec3	src/vec3.cpp	/^vec3 vec3_cross_vec3(vec3 &aVec, vec3 &bVec)$/;"	f
+vec3_desc	src/vec3.cpp	/^std::string vec3_desc(vec3 vec)$/;"	f
+vec3_dot_vec3	src/vec3.cpp	/^double vec3_dot_vec3(vec3 &aVec, vec3 &bVec)$/;"	f
+vec3_length	src/vec3.cpp	/^double vec3_length(vec3 &vec)$/;"	f
+vec3_max_each	src/vec3.h	/^inline void vec3_max_each(vec3 *maxVec, vec3 &aVec)$/;"	f
+vec3_min_each	src/vec3.h	/^inline void vec3_min_each(vec3 *minVec, vec3 &aVec)$/;"	f
+vec3_mult	src/vec3.h	/^inline vec3 vec3_mult(vec3 &vec, double mult)$/;"	f
+vec3_mult	src/vec3.h	/^inline void vec3_mult(vec3 *aVec, double mult)$/;"	f
+vec3_near_vec3_box	src/vec3.cpp	/^bool vec3_near_vec3_box(vec3 &pos1, vec3 &pos2, double tol)$/;"	f
+vec3_set_length	src/vec3.h	/^inline void vec3_set_length(vec3 *vec, double length)$/;"	f
+vec3_sqlength	src/vec3.cpp	/^double vec3_sqlength(vec3 &vec)$/;"	f
+vec3_subtract_from_vec3	src/vec3.cpp	/^void vec3_subtract_from_vec3(vec3 *to, vec3 &from)$/;"	f
+vec3_subtract_vec3	src/vec3.cpp	/^struct vec3 vec3_subtract_vec3(vec3 &to, vec3 &from)$/;"	f
+wipeEffect	src/SlipObject.cpp	/^void SlipObject::wipeEffect()$/;"	f	class:SlipObject
+x	src/vec3.h	/^	double x;$/;"	m	struct:vec2
+x	src/vec3.h	/^	double x;$/;"	m	struct:vec3
+y	src/vec3.h	/^	double y;$/;"	m	struct:vec2
+y	src/vec3.h	/^	double y;$/;"	m	struct:vec3
+z	src/vec3.h	/^	double z;$/;"	m	struct:vec3
+~DetectorView	src/DetectorView.cpp	/^DetectorView::~DetectorView()$/;"	f	class:DetectorView
+~SlipObject	src/SlipObject.h	/^	virtual ~SlipObject() {};$/;"	f	class:SlipObject

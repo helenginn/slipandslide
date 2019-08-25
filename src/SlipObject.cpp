@@ -17,7 +17,9 @@
 // Please email: vagabond @ hginn.co.uk for more details.
 
 #include "SlipObject.h"
+#include "SlipGL.h"
 #include "charmanip.h"
+#include "mat3x3.h"
 #include <iostream>
 #include <cmath>
 #include <string>
@@ -157,6 +159,11 @@ SlipObject::SlipObject()
 {
 	_renderType = GL_TRIANGLES;
 	_program = 0;
+	_bufferID = 0;
+	_vbo = 0;
+	_uModel = 0;
+	_extra = 0;
+	_disabled = 0;
 }
 
 GLuint SlipObject::addShaderFromString(GLuint program, GLenum type, 
@@ -371,9 +378,11 @@ void SlipObject::render(SlipGL *sender)
 	
 	checkErrors();
 
-	const char *time_name = "time";
-	_uTime = glGetUniformLocation(_program, time_name);
-	glUniform1fv(_uTime, 1, &_time);
+	mat3x3 model = sender->getModel();
+	float *toFloat = mat3x3_malloc_float3x3(model);
+	const char *uniform_name = "model";
+	_uModel = glGetUniformLocation(_program, uniform_name);
+	glUniformMatrix3fv(_uModel, 1, GL_FALSE, toFloat);
 
 	if (_textures.size())
 	{
@@ -383,11 +392,6 @@ void SlipObject::render(SlipGL *sender)
 	glDrawElements(_renderType, indexCount(), GL_UNSIGNED_INT, 0);
 	checkErrors();
 	
-	if (!shouldWipe())
-	{
-		glClear(GL_DEPTH_BUFFER_BIT);
-	}
-
 	glUseProgram(0);
 }
 

@@ -16,9 +16,63 @@
 // 
 // Please email: vagabond @ hginn.co.uk for more details.
 
+#include <iostream>
 #include "SlipPanel.h"
+#include "SlipObject.h"
 
-SlipPanel::SlipPanel() : SlipObject()
+SlipPanel::SlipPanel(struct detector *d, struct panel &p) : SlipObject()
 {
+	/* local panel copy */
+	_p = p;
+	_d = d;
 
+	_cnz = (_p.clen + _p.coffset) * _p.res;
+	setupVertices();
 }
+
+void SlipPanel::setupVertices()
+{
+	_vertices.clear();
+	_indices.clear();
+	
+	_indices.push_back(0);
+	_indices.push_back(1);
+	_indices.push_back(2);
+	_indices.push_back(2);
+	_indices.push_back(1);
+	_indices.push_back(3);
+	
+	Vertex v;
+	memset(v.pos, 0, sizeof(Vertex));
+
+	v.color[3] = 1;
+	
+	v.pos[0] = _p.cnx;
+	v.pos[1] = _p.cny;
+	v.pos[2] = _cnz;
+
+	std::cout << v.pos[0] << " " << v.pos[1] << " " << v.pos[2] << std::endl;
+	_vertices.push_back(v);
+	
+	/* top right */
+	v.pos[0] = _p.cnx + _p.w * _p.fsx;
+	v.pos[1] = _p.cny + _p.w * _p.fsy;
+	v.pos[2] = _cnz  + _p.w * _p.fsz;
+	std::cout << v.pos[0] << " " << v.pos[1] << " " << v.pos[2] << std::endl;
+	_vertices.push_back(v);
+
+	/* bottom left */
+	v.pos[0] = _p.cnx + _p.h * _p.ssx;
+	v.pos[1] = _p.cny + _p.h * _p.ssy;
+	v.pos[2] = _cnz  + _p.h * _p.ssz;
+	std::cout << v.pos[0] << " " << v.pos[1] << " " << v.pos[2] << std::endl;
+	_vertices.push_back(v);
+	
+	/* bottom right */
+	v.pos[0] = _p.cnx + _p.h * _p.ssx + _p.w * _p.fsx;
+	v.pos[1] = _p.cny + _p.h * _p.ssy + _p.w * _p.fsy;
+	v.pos[2] = _cnz  + _p.h * _p.ssz + _p.w * _p.fsz;
+	std::cout << v.pos[0] << " " << v.pos[1] << " " << v.pos[2] << std::endl;
+	_vertices.push_back(v);
+}
+

@@ -79,21 +79,6 @@ public:
 	void midpoint(double *x, double *y);
 	void setDisabled(bool dis);
 	
-	void setTime(float time)
-	{
-		_time = time;
-	}
-	
-	void ignoreAspectRatio(bool ignore = true)
-	{
-		_ignoreAspectRatio = ignore;
-	}
-	
-	bool shouldWipe()
-	{
-		return !_ignoreAspectRatio;
-	}
-	
 	bool isCovered(double x, double y);
 	void setVertices(float t, float b, float l, float r);
 	void addToVertices(float x, float y);
@@ -121,14 +106,11 @@ private:
 	GLuint _bufferID;
 	GLuint _vbo;
 	GLuint _renderType;
-	GLuint _uAspect;
-	GLuint _uTime;
+	GLuint _uModel;
 	std::vector<GLuint> _textures;
 	
-	float _time;
 	bool _extra;
 	bool _disabled;
-	bool _ignoreAspectRatio;
 };
 
 #endif

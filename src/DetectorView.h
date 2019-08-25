@@ -19,6 +19,7 @@
 #ifndef __Slip__DetectorView__
 #define __Slip__DetectorView__
 
+#include "SlipGL.h"
 #include <QMainWindow>
 #include <crystfel/detector.h>
 
@@ -32,6 +33,9 @@ public:
 	void setDetector(struct detector *det);
 
 	~DetectorView();
+	
+protected:
+	virtual void resizeEvent(QResizeEvent *event);
 
 private:
 	struct detector *_det;

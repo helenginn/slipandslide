@@ -20,13 +20,18 @@
 #define __Slip__SlipPanel__
 
 #include "SlipObject.h"
+#include <crystfel/detector.h>
 
 class SlipPanel : public SlipObject
 {
 public:
-	SlipPanel();
+	SlipPanel(struct detector *d, struct panel &p);
 	
+	void setupVertices();
 private:
+	struct panel _p;
+	struct detector *_d;
+	double _cnz;
 
 };
 

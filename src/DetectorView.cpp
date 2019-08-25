@@ -17,25 +17,38 @@
 // Please email: vagabond @ hginn.co.uk for more details.
 
 #include "DetectorView.h"
+#include "SlipGL.h"
 #include <iostream>
+
+class SlipPanel;
 
 DetectorView::DetectorView(QWidget *p) : QMainWindow(p)
 {
-	setGeometry(100, 100, 400, 400);
+	_gl = new SlipGL(this);
+	_gl->show();
 
-	_gl = new SlipGL();
+	resize(1000, 1000);
+}
+
+void DetectorView::resizeEvent(QResizeEvent *event)
+{
+	_gl->setGeometry(0, 0, width(), height());
 }
 
 void DetectorView::setDetector(struct detector *det)
 {
 	_det = det;
+	_gl->preparePanels(_det->n_panels);
 
 	for (int i = 0; i < _det->n_panels; i++)
 	{
 		struct panel p = _det->panels[i];
-		std::cout << "Panel: " << p.name << std::endl;
+		std::cout << "Adding panel: " << p.name << std::endl;
+		
+		_gl->addPanel(p);
 	}
 	
+	_gl->update();
 }
 
 DetectorView::~DetectorView()
