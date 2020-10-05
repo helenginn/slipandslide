@@ -1,4 +1,4 @@
-// Slip n Slide
+// slipnslide
 // Copyright (C) 2019 Helen Ginn
 // 
 // This program is free software: you can redistribute it and/or modify
@@ -16,46 +16,41 @@
 // 
 // Please email: vagabond @ hginn.co.uk for more details.
 
-#ifndef __Slip__SlipGL__
-#define __Slip__SlipGL__
+#include "Line.h"
+#include "vec_utils.h"
+#include "shaders/fImage.h"
+#include "shaders/vari_z.h"
 
-#include <QtWidgets/qopenglwidget.h>
-#include <QtGui/qopengl.h>
-#include <QtGui/qopenglfunctions.h>
-#include <crystfel/detector.h>
-
-#include "mat3x3.h"
-
-class SlipPanel;
-
-class SlipGL : public QOpenGLWidget, QOpenGLFunctions
+Line::Line(vec3 start, vec3 end)
 {
-	Q_OBJECT
+	_start = start;
+	_end = end;
+	updateVertices();
 	
-public:
-	SlipGL(QWidget *parent, struct detector *d = NULL);
-	
-	void preparePanels(int n);
-	void addPanel(struct panel &p);
-	
-	mat3x3 getModel()
-	{
-		return _model;
-	}
-public slots:
-	
-protected:
-	virtual void initializeGL();
-	virtual void paintGL();
+	_fString = fImage();
+	_vString = variable_z_vsh();
+	_renderType = GL_LINES;
+}
 
-private:
-	void initialisePrograms();
+void Line::updateVertices()
+{
+	_vertices.clear();
+	_indices.clear();
 	
-	mat3x3 _model;
-	std::vector<SlipPanel *> _panels;
-
-	struct detector *_d;
-};
+	_indices.push_back(0);
+	_indices.push_back(1);
 
 
-#endif
+	Vertex v;
+	memset(v.pos, 0, sizeof(Vertex));
+
+	v.color[0] = 1;
+	v.color[1] = 1;
+	v.color[2] = 1;
+	v.color[3] = 1;
+
+	pos_from_vec(v.pos, _start);
+	_vertices.push_back(v);
+	pos_from_vec(v.pos, _end);
+	_vertices.push_back(v);
+}

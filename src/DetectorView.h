@@ -20,10 +20,17 @@
 #define __Slip__DetectorView__
 
 #include "SlipGL.h"
-#include <QMainWindow>
+#include <QWidget>
 #include <crystfel/detector.h>
+#include <crystfel/image.h>
+#include <QMouseEvent>
 
-class DetectorView : public QMainWindow
+class SlipPanel;
+class QSlider;
+class Curve;
+class Overview;
+
+class DetectorView : public QWidget
 {
 	Q_OBJECT
 	
@@ -31,16 +38,61 @@ public:
 	DetectorView(QWidget *parent = NULL);
 	
 	void setDetector(struct detector *det);
+	void imageToPanels(struct image *im);
+	void updateSlider(QSlider *s);
+	void setDistanceAllPanels(double metres);
+	
+	void setOverview(Overview *over)
+	{
+		_overview = over;
+	}
+	
+	void setTargetCurve(Curve *curve)
+	{
+		_targetCurve = curve;
+	}
+	
+	void setPowderCurve(Curve *curve)
+	{
+		_powderCurve = curve;
+	}
+	
+	SlipPanel *getPanel(int i)
+	{
+		return _panels[i];
+	}
 
 	~DetectorView();
+public slots:
+	void updateGlobalDetectorDistance();
+	void updatePowderPattern();
+	void updateTargetPattern();
 	
 protected:
+	void convertCoords(double *x, double *y);
+
 	virtual void resizeEvent(QResizeEvent *event);
+	virtual void mouseMoveEvent(QMouseEvent *e);
+	virtual void mousePressEvent(QMouseEvent *e);
+	virtual void mouseReleaseEvent(QMouseEvent *e);
+	virtual void keyReleaseEvent(QKeyEvent *event);
+	virtual void keyPressEvent(QKeyEvent *event);
 
 private:
 	struct detector *_det;
-	
 	SlipGL *_gl;
+	std::vector<SlipPanel *> _panels;
+	SlipPanel *_allPanels;
+	SlipPanel *_selected;
+	
+	Overview *_overview;
+	Curve *_powderCurve;
+	Curve *_targetCurve;
+	Qt::MouseButton _mouseButton;
+	bool _controlPressed;
+	bool _moving;
+	double _lastX;
+	double _lastY;
 };
 
 #endif

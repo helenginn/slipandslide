@@ -18,7 +18,7 @@
 
 #include <crystfel/detector.h>
 #include <crystfel/stream.h>
-#include "DetectorView.h"
+#include "Overview.h"
 #include <iostream>
 #include <QApplication>
 
@@ -33,35 +33,54 @@ int main(int argc, char *argv[])
 	/* load geometry file */
 	std::string geomstr = "ginn5.geom";
 	struct detector *det = get_detector_geometry(geomstr.c_str(), NULL);
+	
+	Overview o;
+	o.loadDetector(det);
+
+	Stream *stream = open_stream_for_read("ginn5_mosflm.stream");
+	o.loadStream(stream);
+
+	close_stream(stream);
+
+	int status = app.exec();
+	free_detector_geometry(det);
+
+	return status;
 
 	/* show det*/
+	/*
 	DetectorView detView;
 	detView.setDetector(det);
 	detView.show();
-
-	int status = app.exec();
-	
-	return status;
 
 	std::cout << "Hi" << std::endl;
 	
 	Stream *stream = open_stream_for_read("ginn5_mosflm.stream");
 
+	std::vector<struct image> images;
 	struct image im;
 	im.det = det;
 	
 	std::cout << "Reading ... " << stream << std::endl;
-	if (read_chunk(stream, &im))
+	while (!read_chunk(stream, &im))
 	{
-		std::cout << "Failure to read" << std::endl;
+		int count = image_feature_count(im.features);
+		std::cout << "No. crystals: " << im.n_crystals << " ";
+		std::cout << " and peaks: " << count << std::endl;
+		images.push_back(im);
+		
+		detView.imageToPanels(&im);
 	}
-	
-	std::cout << "Done" << std::endl;
-	std::cout << "Image: " << im.filename << std::endl;
+
+	std::cout << "Failure to read more" << std::endl;
 	
 	free(im.filename);
-	
 	close_stream(stream);
 
+	int status = app.exec();
+	
+	free_detector_geometry(det);
+	
 	return 0;
+	*/
 }
