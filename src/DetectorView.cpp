@@ -138,7 +138,7 @@ void DetectorView::mouseReleaseEvent(QMouseEvent *e)
 
 	for (size_t i = 0; i < _panels.size(); i++)
 	{
-		if (_panels[i]->intersects(x, y, &z))
+		if (_panels[i]->intersectsPolygon(x, y, &z))
 		{
 			closest = _panels[i];
 		}
@@ -148,6 +148,10 @@ void DetectorView::mouseReleaseEvent(QMouseEvent *e)
 	{
 		_selected->togglePanel(closest);
 		_overview->supplyImagesToPanel(_selected);
+	}
+	else
+	{
+		_selected->clearPanels();
 		updatePowderPattern();
 		updateTargetPattern();
 	}
@@ -219,10 +223,10 @@ void DetectorView::setDistanceAllPanels(double metres)
 {
 	for (int i = 0; i < _det->n_panels; i++)
 	{
-		struct panel *p = &(_det->panels[i]);
-		p->clen = metres;
-		_panels[i]->updateTmpPanelValues();
-		_panels[i]->updateVertices();
+		SlipPanel *p = getPanel(i);
+		p->setZ(metres);
+		p->updateTmpPanelValues();
+		p->updateVertices();
 	}
 	
 	std::cout << -metres * 1000 << " mm." << std::endl;
@@ -249,14 +253,7 @@ void DetectorView::updateTargetPattern()
 {
 	if (_targetCurve->getCurveView()->isVisible())
 	{
-		if (_selected->panelCount() > 0)
-		{
-			_selected->updateTarget(_targetCurve, true);
-		}
-		else
-		{
-			_allPanels->updateTarget(_targetCurve, true);
-		}
+		activePanel()->updateTarget(_targetCurve, true);
 	}
 }
 
@@ -264,15 +261,18 @@ void DetectorView::updatePowderPattern()
 {
 	if (_powderCurve->getCurveView()->isVisible())
 	{
-		if (_selected->panelCount() > 0)
-		{
-			_selected->updatePowder(_powderCurve, true);
-		}
-		else
-		{
-			_allPanels->updatePowder(_powderCurve, true);
-		}
+		activePanel()->updatePowder(_powderCurve, true);
 	}
+}
+
+SlipPanel *DetectorView::activePanel()
+{
+	if (_selected->panelCount() > 0)
+	{
+		return _selected;
+	}
+	
+	return _allPanels;
 }
 
 DetectorView::~DetectorView()

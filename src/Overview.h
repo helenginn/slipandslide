@@ -42,12 +42,28 @@ public:
 	void updateDistanceLabel(double mm);
 	void supplyImagesToPanel(SlipPanel *p);
 public slots:
+	void handleImageSlider(int tick);
+	void handleIntensitySlider(int tick);
+	void handleRadiusSlider(int tick);
+	void handleAlphaSlider(int tick);
+	void handleBetaSlider(int tick);
 
 protected:
 	void powderGraph(QTabWidget *tab);
 	void targetGraph(QTabWidget *tab);
+
 	void makeDistanceSlider(QWidget *prev);
+	void makeImageSlider(QWidget *prev);
+	void makeIntensitySlider(QWidget *prev);
+	void makeRadiusSlider(QWidget *prev);
+	void makeAlphaSlider(QWidget *prev);
+	void makeBetaSlider(QWidget *prev);
 private:
+	void makeSlider(QSlider **handle, QWidget *prev);
+	void makeSliderLabel(QLabel **label, QWidget *prev);
+
+	double targetScore();
+
 	std::vector<struct image> _images;
 	CurveView *_powderView;
 	CurveView *_targetView;
@@ -55,7 +71,17 @@ private:
 	struct detector *_detector;
 
 	QSlider *_distanceSlider;
+	QSlider *_imageSlider;
+	QSlider *_intensitySlider;
+	QSlider *_radiusSlider;
+	QSlider *_alphaSlider;
+	QSlider *_betaSlider;
 	QLabel *_distanceLabel;
+	QLabel *_imageLabel;
+	QLabel *_intensityLabel;
+	QLabel *_radiusLabel;
+	QLabel *_alphaLabel;
+	QLabel *_betaLabel;
 };
 
 #endif

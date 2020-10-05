@@ -7,6 +7,7 @@
 CMAKE_BINARY_DIR	build/current/meson-private/cmake_helen3d/Makefile	/^CMAKE_BINARY_DIR = \/home\/ginn\/Software\/slipnslide\/build\/current\/meson-private\/cmake_helen3d$/;"	m
 CMAKE_COMMAND	build/current/meson-private/cmake_helen3d/Makefile	/^CMAKE_COMMAND = \/usr\/bin\/cmake$/;"	m
 CMAKE_SOURCE_DIR	build/current/meson-private/cmake_helen3d/Makefile	/^CMAKE_SOURCE_DIR = \/home\/ginn\/Software\/slipnslide\/build\/current\/meson-private\/cmake_helen3d$/;"	m
+DESELECTED_COLOUR	src/SlipPanel.cpp	32;"	d	file:
 DetectorView	src/DetectorView.cpp	/^DetectorView::DetectorView(QWidget *p) : QWidget(p)$/;"	f	class:DetectorView
 DetectorView	src/DetectorView.h	/^class DetectorView : public QWidget$/;"	c
 EQUALS	build/current/meson-private/cmake_helen3d/Makefile	/^EQUALS = =$/;"	m
@@ -18,9 +19,10 @@ PAN_SENSITIVITY	src/DetectorView.cpp	29;"	d	file:
 QT_MOC_LITERAL	build/current/slipnslide@exe/moc_DetectorView.cpp	27;"	d	file:
 QT_MOC_LITERAL	build/current/slipnslide@exe/moc_DetectorView.cpp	44;"	d	file:
 QT_MOC_LITERAL	build/current/slipnslide@exe/moc_Overview.cpp	27;"	d	file:
-QT_MOC_LITERAL	build/current/slipnslide@exe/moc_Overview.cpp	39;"	d	file:
+QT_MOC_LITERAL	build/current/slipnslide@exe/moc_Overview.cpp	44;"	d	file:
 RM	build/current/meson-private/cmake_helen3d/Makefile	/^RM = \/usr\/bin\/cmake -E remove -f$/;"	m
-RefPeak	src/SlipPanel.h	/^typedef std::pair<Reflection *, struct imagefeature *> RefPeak;$/;"	t
+RefPeak	src/SlipPanel.h	/^} RefPeak;$/;"	t	typeref:struct:__anon1
+SELECTED_COLOUR	src/SlipPanel.cpp	33;"	d	file:
 SHELL	build/current/meson-private/cmake_helen3d/Makefile	/^SHELL = \/bin\/sh$/;"	m
 SUFFIXES	build/current/meson-private/cmake_helen3d/Makefile	/^SUFFIXES =$/;"	m
 SlipPanel	src/SlipPanel.cpp	/^SlipPanel::SlipPanel()$/;"	f	class:SlipPanel
@@ -46,11 +48,20 @@ _end	src/Line.h	/^	vec3 _end;$/;"	m	class:Line
 _fs	src/SlipPanel.h	/^	vec3 _fs;          \/* unit vector fast axis *\/$/;"	m	class:SlipPanel
 _gl	src/DetectorView.h	/^	SlipGL *_gl;$/;"	m	class:DetectorView
 _height	src/SlipPanel.h	/^	double _height;    \/* in pixels, ss multiplier *\/$/;"	m	class:SlipPanel
+_imageLabel	src/Overview.h	/^	QLabel *_imageLabel;$/;"	m	class:Overview
+_imageSlider	src/Overview.h	/^	QSlider *_imageSlider;$/;"	m	class:Overview
 _imageStarts	src/SlipPanel.h	/^	std::vector<size_t> _imageStarts;$/;"	m	class:SlipPanel
 _images	src/Overview.h	/^	std::vector<struct image> _images;$/;"	m	class:Overview
 _images	src/SlipPanel.h	/^	std::vector<struct image *> _images;$/;"	m	class:SlipPanel
+_intensityLabel	src/Overview.h	/^	QLabel *_intensityLabel;$/;"	m	class:Overview
+_intensitySlider	src/Overview.h	/^	QSlider *_intensitySlider;$/;"	m	class:Overview
+_isSelected	src/SlipPanel.h	/^	bool _isSelected;$/;"	m	class:SlipPanel
 _lastX	src/DetectorView.h	/^	double _lastX;$/;"	m	class:DetectorView
 _lastY	src/DetectorView.h	/^	double _lastY;$/;"	m	class:DetectorView
+_maxImages	src/SlipPanel.cpp	/^size_t SlipPanel::_maxImages = 20;$/;"	m	class:SlipPanel	file:
+_maxImages	src/SlipPanel.h	/^	static size_t _maxImages;$/;"	m	class:SlipPanel
+_minIntensity	src/SlipPanel.cpp	/^double SlipPanel::_minIntensity = 200;$/;"	m	class:SlipPanel	file:
+_minIntensity	src/SlipPanel.h	/^	static double _minIntensity;$/;"	m	class:SlipPanel
 _mouseButton	src/DetectorView.h	/^	Qt::MouseButton _mouseButton;$/;"	m	class:DetectorView
 _moving	src/DetectorView.h	/^	bool _moving;$/;"	m	class:DetectorView
 _overview	src/DetectorView.h	/^	Overview *_overview;$/;"	m	class:DetectorView
@@ -61,6 +72,7 @@ _peaks	src/SlipPanel.h	/^	std::vector<struct imagefeature> _peaks;$/;"	m	class:S
 _powderCurve	src/DetectorView.h	/^	Curve *_powderCurve;$/;"	m	class:DetectorView
 _powderView	src/Overview.h	/^	CurveView *_powderView;$/;"	m	class:Overview
 _px_per_m	src/SlipPanel.h	/^	double _px_per_m;  \/* pixels per metre *\/$/;"	m	class:SlipPanel
+_selected	src/DetectorView.h	/^	SlipPanel *_selected;$/;"	m	class:DetectorView
 _single	src/SlipPanel.h	/^	bool _single;$/;"	m	class:SlipPanel
 _ss	src/SlipPanel.h	/^	vec3 _ss;          \/* unit vector slow axis *\/$/;"	m	class:SlipPanel
 _start	src/Line.h	/^	vec3 _start;$/;"	m	class:Line
@@ -68,15 +80,24 @@ _subpanels	src/SlipPanel.h	/^	std::vector<SlipPanel *> _subpanels;$/;"	m	class:S
 _targetCurve	src/DetectorView.h	/^	Curve *_targetCurve;$/;"	m	class:DetectorView
 _targetView	src/Overview.h	/^	CurveView *_targetView;$/;"	m	class:Overview
 _width	src/SlipPanel.h	/^	double _width;     \/* in pixels, fs multiplier *\/$/;"	m	class:SlipPanel
+activePanel	src/DetectorView.cpp	/^SlipPanel *DetectorView::activePanel()$/;"	f	class:DetectorView
 addPanel	src/SlipPanel.cpp	/^void SlipPanel::addPanel(SlipPanel *other)$/;"	f	class:SlipPanel
+apply_max_adu	src/Overview.cpp	/^static RefList *apply_max_adu(RefList *list, double max_adu)$/;"	f	file:
+clearImageData	src/SlipPanel.h	/^	void clearImageData()$/;"	f	class:SlipPanel
+clearPanels	src/SlipPanel.cpp	/^void SlipPanel::clearPanels()$/;"	f	class:SlipPanel
+convertCoords	src/DetectorView.cpp	/^void DetectorView::convertCoords(double *x, double *y)$/;"	f	class:DetectorView
+createVertices	src/SlipPanel.cpp	/^void SlipPanel::createVertices()$/;"	f	class:SlipPanel
 data	build/current/slipnslide@exe/moc_DetectorView.cpp	/^    QByteArrayData data[5];$/;"	m	struct:qt_meta_stringdata_DetectorView_t	file:
-data	build/current/slipnslide@exe/moc_Overview.cpp	/^    QByteArrayData data[1];$/;"	m	struct:qt_meta_stringdata_Overview_t	file:
+data	build/current/slipnslide@exe/moc_Overview.cpp	/^    QByteArrayData data[5];$/;"	m	struct:qt_meta_stringdata_Overview_t	file:
 fImage	src/shaders/fImage.h	/^inline std::string fImage()$/;"	f
 fWipe	src/shaders/fWipe.h	/^std::string fWipe =$/;"	v
-findClosestPeak	src/SlipPanel.cpp	/^struct imagefeature *SlipPanel::findClosestPeak(double fs, double ss)$/;"	f	class:SlipPanel
+findClosestPeak	src/SlipPanel.cpp	/^struct imagefeature *SlipPanel::findClosestPeak(struct image *im,$/;"	f	class:SlipPanel
 getPanel	src/DetectorView.h	/^	SlipPanel *getPanel(int i)$/;"	f	class:DetectorView
 getPeaksFromImage	src/SlipPanel.cpp	/^void SlipPanel::getPeaksFromImage(struct image *im)$/;"	f	class:SlipPanel
+handleImageSlider	src/Overview.cpp	/^void Overview::handleImageSlider(int tick)$/;"	f	class:Overview
+handleIntensitySlider	src/Overview.cpp	/^void Overview::handleIntensitySlider(int tick)$/;"	f	class:Overview
 imageToPanels	src/DetectorView.cpp	/^void DetectorView::imageToPanels(struct image *im)$/;"	f	class:DetectorView
+isSelected	src/SlipPanel.h	/^	bool isSelected()$/;"	f	class:SlipPanel
 isValidPanelMember	src/SlipPanel.cpp	/^bool SlipPanel::isValidPanelMember(struct panel *p)$/;"	f	class:SlipPanel
 keyPressEvent	src/DetectorView.cpp	/^void DetectorView::keyPressEvent(QKeyEvent *event)$/;"	f	class:DetectorView
 keyReleaseEvent	src/DetectorView.cpp	/^void DetectorView::keyReleaseEvent(QKeyEvent *event)$/;"	f	class:DetectorView
@@ -85,11 +106,17 @@ loadStream	src/Overview.cpp	/^void Overview::loadStream(Stream *stream)$/;"	f	cl
 main	build/current/meson-private/sanitycheckcpp.cc	/^class breakCCompiler;int main(int argc, char **argv) { return 0; }$/;"	f
 main	src/main.cpp	/^int main(int argc, char *argv[])$/;"	f
 makeDistanceSlider	src/Overview.cpp	/^void Overview::makeDistanceSlider(QWidget *prev)$/;"	f	class:Overview
+makeImageSlider	src/Overview.cpp	/^void Overview::makeImageSlider(QWidget *prev)$/;"	f	class:Overview
+makeIntensitySlider	src/Overview.cpp	/^void Overview::makeIntensitySlider(QWidget *prev)$/;"	f	class:Overview
+makeSlider	src/Overview.cpp	/^void Overview::makeSlider(QSlider **handle, QWidget *prev)$/;"	f	class:Overview
 metaObject	build/current/slipnslide@exe/moc_DetectorView.cpp	/^const QMetaObject *DetectorView::metaObject() const$/;"	f	class:DetectorView
 metaObject	build/current/slipnslide@exe/moc_Overview.cpp	/^const QMetaObject *Overview::metaObject() const$/;"	f	class:Overview
 mouseMoveEvent	src/DetectorView.cpp	/^void DetectorView::mouseMoveEvent(QMouseEvent *e)$/;"	f	class:DetectorView
 mousePressEvent	src/DetectorView.cpp	/^void DetectorView::mousePressEvent(QMouseEvent *e)$/;"	f	class:DetectorView
+mouseReleaseEvent	src/DetectorView.cpp	/^void DetectorView::mouseReleaseEvent(QMouseEvent *e)$/;"	f	class:DetectorView
+panelCount	src/SlipPanel.h	/^	size_t panelCount()$/;"	f	class:SlipPanel
 panelPtr	src/SlipPanel.h	/^	struct panel *panelPtr()$/;"	f	class:SlipPanel
+peak	src/SlipPanel.h	/^	struct imagefeature *peak;$/;"	m	struct:__anon1	typeref:struct:__anon1::imagefeature
 powderGraph	src/Overview.cpp	/^void Overview::powderGraph(QTabWidget *tab)$/;"	f	class:Overview
 qt_meta_data_DetectorView	build/current/slipnslide@exe/moc_DetectorView.cpp	/^static const uint qt_meta_data_DetectorView[] = {$/;"	v	file:
 qt_meta_data_Overview	build/current/slipnslide@exe/moc_Overview.cpp	/^static const uint qt_meta_data_Overview[] = {$/;"	v	file:
@@ -103,18 +130,27 @@ qt_metacast	build/current/slipnslide@exe/moc_DetectorView.cpp	/^void *DetectorVi
 qt_metacast	build/current/slipnslide@exe/moc_Overview.cpp	/^void *Overview::qt_metacast(const char *_clname)$/;"	f	class:Overview
 qt_static_metacall	build/current/slipnslide@exe/moc_DetectorView.cpp	/^void DetectorView::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)$/;"	f	class:DetectorView
 qt_static_metacall	build/current/slipnslide@exe/moc_Overview.cpp	/^void Overview::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)$/;"	f	class:Overview
+rayTraceToPanel	src/SlipPanel.cpp	/^vec3 SlipPanel::rayTraceToPanel(struct panel *p, vec3 dir)$/;"	f	class:SlipPanel
+recip	src/SlipPanel.h	/^	vec3 recip;$/;"	m	struct:__anon1
+ref	src/SlipPanel.h	/^	Reflection *ref;$/;"	m	struct:__anon1
 resizeEvent	src/DetectorView.cpp	/^void DetectorView::resizeEvent(QResizeEvent *event)$/;"	f	class:DetectorView
 rvec_to_vec3	src/vec_utils.h	/^inline vec3 rvec_to_vec3(struct rvec r)$/;"	f
 setDetector	src/DetectorView.cpp	/^void DetectorView::setDetector(struct detector *det)$/;"	f	class:DetectorView
 setDistanceAllPanels	src/DetectorView.cpp	/^void DetectorView::setDistanceAllPanels(double metres)$/;"	f	class:DetectorView
+setMaxImages	src/SlipPanel.h	/^	static void setMaxImages(size_t max)$/;"	f	class:SlipPanel
+setMinIntensity	src/SlipPanel.h	/^	static void setMinIntensity(int min)$/;"	f	class:SlipPanel
 setOverview	src/DetectorView.h	/^	void setOverview(Overview *over)$/;"	f	class:DetectorView
 setPowderCurve	src/DetectorView.h	/^	void setPowderCurve(Curve *curve)$/;"	f	class:DetectorView
+setSelected	src/SlipPanel.cpp	/^void SlipPanel::setSelected(bool sel)$/;"	f	class:SlipPanel
 setTargetCurve	src/DetectorView.h	/^	void setTargetCurve(Curve *curve)$/;"	f	class:DetectorView
+shortDesc	src/SlipPanel.cpp	/^std::string SlipPanel::shortDesc()$/;"	f	class:SlipPanel
 staticMetaObject	build/current/slipnslide@exe/moc_DetectorView.cpp	/^QT_INIT_METAOBJECT const QMetaObject DetectorView::staticMetaObject = {$/;"	m	class:DetectorView	file:
 staticMetaObject	build/current/slipnslide@exe/moc_Overview.cpp	/^QT_INIT_METAOBJECT const QMetaObject Overview::staticMetaObject = {$/;"	m	class:Overview	file:
 stringdata0	build/current/slipnslide@exe/moc_DetectorView.cpp	/^    char stringdata0[83];$/;"	m	struct:qt_meta_stringdata_DetectorView_t	file:
-stringdata0	build/current/slipnslide@exe/moc_Overview.cpp	/^    char stringdata0[9];$/;"	m	struct:qt_meta_stringdata_Overview_t	file:
+stringdata0	build/current/slipnslide@exe/moc_Overview.cpp	/^    char stringdata0[55];$/;"	m	struct:qt_meta_stringdata_Overview_t	file:
+supplyImagesToPanel	src/Overview.cpp	/^void Overview::supplyImagesToPanel(SlipPanel *p)$/;"	f	class:Overview
 targetGraph	src/Overview.cpp	/^void Overview::targetGraph(QTabWidget *tab)$/;"	f	class:Overview
+togglePanel	src/SlipPanel.cpp	/^void SlipPanel::togglePanel(SlipPanel *other)$/;"	f	class:SlipPanel
 updateDistanceLabel	src/Overview.cpp	/^void Overview::updateDistanceLabel(double mm)$/;"	f	class:Overview
 updateGlobalDetectorDistance	src/DetectorView.cpp	/^void DetectorView::updateGlobalDetectorDistance()$/;"	f	class:DetectorView
 updatePeaks	src/SlipPanel.cpp	/^void SlipPanel::updatePeaks()$/;"	f	class:SlipPanel

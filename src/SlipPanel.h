@@ -52,6 +52,16 @@ public:
 		_imageStarts.clear();
 	}
 	
+	static void setMaxImages(size_t max)
+	{
+		_maxImages = max;
+	}
+	
+	static void setMinIntensity(int min)
+	{
+		_minIntensity = min;
+	}
+	
 	size_t panelCount()
 	{
 		return _subpanels.size();
@@ -65,15 +75,49 @@ public:
 	{
 		return _isSelected;
 	}
+	
+	static double getRadius(void *object)
+	{
+		return static_cast<SlipPanel *>(object)->_radius;
+	}
+	
+	static void setRadius(void *object, double radius)
+	{
+		static_cast<SlipPanel *>(object)->_radius = radius;
+	}
+	
+	static double getAlpha(void *object)
+	{
+		return static_cast<SlipPanel *>(object)->_alpha;
+	}
+	
+	static void setAlpha(void *object, double alpha)
+	{
+		static_cast<SlipPanel *>(object)->_alpha = alpha;
+	}
+	
+	static double getBeta(void *object)
+	{
+		return static_cast<SlipPanel *>(object)->_beta;
+	}
+	
+	static void setBeta(void *object, double beta)
+	{
+		static_cast<SlipPanel *>(object)->_beta = beta;
+	}
 
+	void setZ(double metres);
 	void updateTmpPanelValues();
 	void updateVertices();
 	void createVertices();
+	void nudgePanels(SlipPanel *parent = NULL);
 	
 	void getPeaksFromImage(struct image *im);
 	
 	void updatePowder(Curve *c, bool refresh = true);
 	void updateTarget(Curve *c, bool refresh = true);
+
+	double squishableTargetScore();
 protected:
 	struct imagefeature *findClosestPeak(struct image *im,
 	                                     double fs, double ss);
@@ -86,16 +130,36 @@ protected:
 		return _panel;
 	}
 private:
-	vec3 _corner;      /* in pixels */
+	void makePanelBackup();
+	void nudgePanel(SlipPanel *parent);
+	void initialise();
+	vec3 centroid();
+
+	vec3 _corner;      /* in mm */
 	vec3 _fs;          /* unit vector fast axis */
 	vec3 _ss;          /* unit vector slow axis */
+	vec3 _centre;      /* x,y in pixels, z in metres */
 	double _width;     /* in pixels, fs multiplier */
 	double _height;    /* in pixels, ss multiplier */
 	double _px_per_m;  /* pixels per metre */
+	
+	double _alpha;
+	double _beta;
+	double _gamma;
+
+	double _radius;
+	double _horiz;
+	double _vert;
+	
+	std::vector<double> _xs;
+	std::vector<double> _ys;
 
 	bool _isSelected;
 	bool _single;
+	static size_t _maxImages;
+	static double _minIntensity;
 	struct panel *_panel;
+	struct panel *_backup;
 	std::vector<SlipPanel *> _subpanels;
 
 	std::vector<struct imagefeature> _peaks;

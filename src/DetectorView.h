@@ -41,6 +41,7 @@ public:
 	void imageToPanels(struct image *im);
 	void updateSlider(QSlider *s);
 	void setDistanceAllPanels(double metres);
+	SlipPanel *activePanel();
 	
 	void setOverview(Overview *over)
 	{

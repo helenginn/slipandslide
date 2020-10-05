@@ -48,6 +48,16 @@ Overview::Overview(QWidget *parent) : QMainWindow(parent)
 	_targetView = NULL;
 	_distanceSlider = NULL;
 	_distanceLabel = NULL;
+	_radiusSlider = NULL;
+	_radiusLabel = NULL;
+	_imageSlider = NULL;
+	_imageLabel = NULL;
+	_intensitySlider = NULL;
+	_intensityLabel = NULL;
+	_alphaSlider = NULL;
+	_alphaLabel = NULL;
+	_betaSlider = NULL;
+	_betaLabel = NULL;
 
 	setWindowState(Qt::WindowFullScreen);
 	setWindowFlags(Qt::CustomizeWindowHint | Qt::FramelessWindowHint);
@@ -68,26 +78,166 @@ void Overview::loadDetector(struct detector *det)
 	_detView->show();
 }
 
+void Overview::makeSlider(QSlider **handle, QWidget *prev)
+{
+	delete *handle;
+	*handle = new QSlider(Qt::Horizontal, this);
+	int w = QGuiApplication::primaryScreen()->size().width();
+	w -= prev->geometry().left();
+
+	(*handle)->setGeometry(prev->geometry().left() + w * 1./3.,
+	                             prev->geometry().bottom(), 
+	                             w * 2/3., 30);
+	(*handle)->setMinimum(0);
+	(*handle)->setMaximum(2500);
+	(*handle)->show();
+}
+
+void Overview::makeSliderLabel(QLabel **label, QWidget *prev)
+{
+	int w = QGuiApplication::primaryScreen()->size().width();
+	w -= prev->geometry().left();
+
+	delete *label;
+	(*label) = new QLabel("", this);
+	(*label)->setGeometry(prev->geometry().left(),
+	                            prev->geometry().bottom(),
+	                            w * 1/3., 30);
+	(*label)->show();
+
+}
+
 void Overview::makeDistanceSlider(QWidget *prev)
 {
-	delete _distanceSlider;
-	_distanceSlider = new QSlider(Qt::Horizontal, this);
-	_distanceSlider->setGeometry(prev->geometry().left(),
-	                             prev->geometry().bottom(), 
-	                             prev->width(), 30);
-	_distanceSlider->setMinimum(0);
-	_distanceSlider->setMaximum(2500);
-	_distanceSlider->show();
-	
-	delete _distanceLabel;
-	_distanceLabel = new QLabel("Detector distance: ", this);
-	_distanceLabel->setGeometry(prev->geometry().left(),
-	                            _distanceSlider->geometry().bottom(),
-	                             prev->width(), 30);
-	_distanceLabel->show();
+	makeSlider(&_distanceSlider, prev);
+	makeSliderLabel(&_distanceLabel, prev);
+	_distanceLabel->setText("Detector distance: ");
 
 	_detView->updateSlider(_distanceSlider);
+}
 
+void Overview::makeRadiusSlider(QWidget *prev)
+{
+	makeSlider(&_radiusSlider, prev);
+	makeSliderLabel(&_radiusLabel, prev);
+	_radiusSlider->setMinimum(-100);
+	_radiusSlider->setMaximum(+100);
+	_radiusSlider->setValue(0);
+	connect(_radiusSlider, &QSlider::valueChanged, 
+	        this, &Overview::handleRadiusSlider);
+
+	_radiusLabel->setText("Radius offset: 0 mm");
+}
+
+void Overview::makeBetaSlider(QWidget *prev)
+{
+	makeSlider(&_betaSlider, prev);
+	makeSliderLabel(&_betaLabel, prev);
+	_betaSlider->setMinimum(-100);
+	_betaSlider->setMaximum(+100);
+	_betaSlider->setValue(0);
+	connect(_betaSlider, &QSlider::valueChanged, 
+	        this, &Overview::handleBetaSlider);
+
+	_betaLabel->setText("Second angle: 0°");
+}
+
+void Overview::makeAlphaSlider(QWidget *prev)
+{
+	makeSlider(&_alphaSlider, prev);
+	makeSliderLabel(&_alphaLabel, prev);
+	_alphaSlider->setMinimum(-100);
+	_alphaSlider->setMaximum(+100);
+	_alphaSlider->setValue(0);
+	connect(_alphaSlider, &QSlider::valueChanged, 
+	        this, &Overview::handleAlphaSlider);
+
+	_alphaLabel->setText("First angle: 0°");
+}
+
+void Overview::makeIntensitySlider(QWidget *prev)
+{
+	makeSlider(&_intensitySlider, prev);
+	_intensitySlider->setMaximum(2000);
+	_intensitySlider->setValue(200);
+	connect(_intensitySlider, &QSlider::valueChanged, 
+	        this, &Overview::handleIntensitySlider);
+
+	makeSliderLabel(&_intensityLabel, prev);
+	_intensityLabel->setText("Minimum intensity: 200 ADU");
+}
+
+void Overview::makeImageSlider(QWidget *prev)
+{
+	makeSlider(&_imageSlider, prev);
+	_imageSlider->setMaximum(_images.size());
+	_imageSlider->setValue(20);
+	connect(_imageSlider, &QSlider::valueChanged, 
+	        this, &Overview::handleImageSlider);
+
+	makeSliderLabel(&_imageLabel, prev);
+	_imageLabel->setText("Up to 20 images");
+}
+
+void Overview::handleBetaSlider(int tick)
+{
+	double b = tick / 50.;
+	std::string str = "Second angle: " + f_to_str(b, 2) + "°";
+	_betaLabel->setText(QString::fromStdString(str));
+
+	SlipPanel *panel = _detView->activePanel();
+	SlipPanel::setBeta(panel, b * M_PI / 180 );
+	panel->nudgePanels();
+	
+	_detView->updatePowderPattern();
+	_detView->updateTargetPattern();
+}
+
+void Overview::handleAlphaSlider(int tick)
+{
+	double a = tick / 50.;
+	std::string str = "First angle: " + f_to_str(a, 2) + "°";
+	_alphaLabel->setText(QString::fromStdString(str));
+
+	SlipPanel *panel = _detView->activePanel();
+	SlipPanel::setAlpha(panel, a * M_PI / 180 );
+	panel->nudgePanels();
+	
+	_detView->updatePowderPattern();
+	_detView->updateTargetPattern();
+}
+
+void Overview::handleRadiusSlider(int tick)
+{
+	double r = tick / 50.;
+	std::string str = "Radius offset: " + f_to_str(r, 2) + " mm";
+	_radiusLabel->setText(QString::fromStdString(str));
+
+	SlipPanel *panel = _detView->activePanel();
+	SlipPanel::setRadius(panel, r / 1000);
+	panel->nudgePanels();
+	
+	_detView->updatePowderPattern();
+	_detView->updateTargetPattern();
+}
+
+void Overview::handleIntensitySlider(int tick)
+{
+	std::string str = "Minimum intensity: " + i_to_str(tick) + " ADU";
+	_intensityLabel->setText(QString::fromStdString(str));
+	SlipPanel::setMinIntensity(tick);
+	supplyImagesToPanel(_detView->activePanel());
+	_detView->updatePowderPattern();
+	_detView->updateTargetPattern();
+}
+
+void Overview::handleImageSlider(int tick)
+{
+	std::string str = "Up to " + i_to_str(tick) + " images";
+	_imageLabel->setText(QString::fromStdString(str));
+	supplyImagesToPanel(_detView->activePanel());
+	_detView->updatePowderPattern();
+	_detView->updateTargetPattern();
 }
 
 void Overview::powderGraph(QTabWidget *tab)
@@ -255,16 +405,24 @@ void Overview::loadStream(Stream *stream)
 	powderGraph(tabs);
 	targetGraph(tabs);
 	makeDistanceSlider(tabs);
+	makeImageSlider(_distanceLabel);
+	makeIntensitySlider(_imageLabel);
+	makeRadiusSlider(_intensityLabel);
+	makeAlphaSlider(_radiusLabel);
+	makeBetaSlider(_alphaLabel);
 }
 
 void Overview::supplyImagesToPanel(SlipPanel *p)
 {
 	p->clearImageData();
+	p->setMaxImages(_imageSlider->value());
 	for (size_t i = 0; i < _images.size(); i++)
 	{
 		struct image *ptr = &_images[i];
 		p->getPeaksFromImage(ptr);
 	}
 	
-
+	_detView->updatePowderPattern();
+	_detView->updateTargetPattern();
 }
+

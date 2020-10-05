@@ -21,6 +21,7 @@
 #include <FileReader.h>
 #include <iomanip>
 #include "vec_utils.h"
+#include <mat3x3.h>
 #include "SlipPanel.h"
 #include "SlipObject.h"
 #include "Curve.h"
@@ -32,11 +33,29 @@
 #define DESELECTED_COLOUR (0.5)
 #define SELECTED_COLOUR (1.0)
 
+size_t SlipPanel::_maxImages = 20;
+double SlipPanel::_minIntensity = 200;
+
+void SlipPanel::initialise()
+{
+	_single = false;
+	_isSelected = false;
+	_panel = NULL;
+	_backup = NULL;
+	_radius = 0;
+	_horiz = 0;
+	_vert = 0;
+	_alpha = 0;
+	_beta = 0;
+	_gamma = 0;
+}
+
 SlipPanel::SlipPanel(struct panel *p) : SlipObject()
 {
+	initialise();
 	_single = true;
 	_panel = p;
-	_isSelected = false;
+	makePanelBackup();
 	updateTmpPanelValues();
 	createVertices();
 
@@ -46,9 +65,7 @@ SlipPanel::SlipPanel(struct panel *p) : SlipObject()
 
 SlipPanel::SlipPanel()
 {
-	_single = false;
-	_isSelected = false;
-	_panel = NULL;
+	initialise();
 }
 
 void SlipPanel::addPanel(SlipPanel *other)
@@ -64,6 +81,114 @@ void SlipPanel::addPanel(SlipPanel *other)
 	}
 	
 	_subpanels.push_back(other);
+}
+
+void SlipPanel::makePanelBackup()
+{
+	_backup = (struct panel *)malloc(sizeof(struct panel));
+	*_backup = *_panel;
+}
+
+vec3 SlipPanel::centroid()
+{
+	if (_panel != NULL)
+	{
+		return _centre;
+	}
+	
+	vec3 c = empty_vec3();
+
+	for (size_t i = 0; i < _subpanels.size(); i++)
+	{
+		SlipPanel *p = _subpanels[i];
+		vec3 add = p->centroid();
+		vec3_add_to_vec3(&c, add);
+	}
+	
+	vec3_mult(&c, 1 / (double)_subpanels.size());
+
+	return c;
+}
+
+void SlipPanel::nudgePanel(SlipPanel *parent)
+{
+	*_panel = *_backup;
+
+	vec3 c = parent->centroid();
+	std::cout << vec3_desc(c) << std::endl;
+	c.x /= _panel->res;
+	c.y /= _panel->res;
+	vec3 c2 = c;
+	double l = vec3_length(c) + parent->_radius;
+	
+	vec3 unit = c;
+	vec3_set_length(&unit, 1);
+	mat3x3 basis = mat3x3_ortho_axes(unit);
+	mat3x3 rot = mat3x3_rotate(parent->_alpha, 
+	                           parent->_beta, 
+	                           parent->_gamma);
+
+	mat3x3 transbasis = mat3x3_transpose(basis);
+	mat3x3 combine = mat3x3_mult_mat3x3(rot, transbasis);
+	combine = mat3x3_mult_mat3x3(basis, combine);
+	
+
+	vec3_set_length(&c2, l);
+	vec3 diff = vec3_subtract_vec3(c2, c);
+
+	double d = (_backup->clen + _backup->coffset);
+	vec3 corner = make_vec3(_backup->cnx / _backup->res, 
+	                        _backup->cny / _backup->res, d);
+	vec3 rotdiff = vec3_subtract_vec3(corner, c);
+	mat3x3_mult_vec(combine, &rotdiff);
+	corner = vec3_add_vec3(c, rotdiff);
+	
+	vec3 fs = make_vec3(_backup->fsx, _backup->fsy, _backup->fsz);
+	vec3 ss = make_vec3(_backup->ssx, _backup->ssy, _backup->ssz);
+	
+	mat3x3_mult_vec(combine, &fs);
+	mat3x3_mult_vec(combine, &ss);
+
+	vec3 new_corner = vec3_add_vec3(corner, diff);
+
+	_panel->clen = new_corner.z;
+	_panel->cnx = new_corner.x * _panel->res;
+	_panel->cny = new_corner.y * _panel->res;
+
+	_panel->fsx = fs.x;
+	_panel->fsy = fs.y;
+	_panel->fsz = fs.z;
+
+	_panel->ssx = ss.x;
+	_panel->ssy = ss.y;
+	_panel->ssz = ss.z;
+	
+	updateTmpPanelValues();
+	updateVertices();
+}
+
+void SlipPanel::setZ(double metres)
+{
+	_panel->clen = metres;
+	makePanelBackup();
+}
+
+void SlipPanel::nudgePanels(SlipPanel *parent)
+{
+	if (parent == NULL)
+	{
+		parent = this;
+	}
+	
+	if (_panel != NULL)
+	{
+		nudgePanel(parent);
+	}
+	
+	for (size_t i = 0; i < _subpanels.size(); i++)
+	{
+		_subpanels[i]->nudgePanels(parent);
+	}
 }
 
 void SlipPanel::updateTmpPanelValues()
@@ -85,6 +210,18 @@ void SlipPanel::updateTmpPanelValues()
 	_ss = ss;
 	_width = _panel->w / mm;
 	_height = _panel->h / mm;
+	
+	d = (_backup->clen + _backup->coffset);
+	_centre = make_vec3(_backup->cnx / _backup->res, 
+	                    _backup->cny / _backup->res, d);
+	std::cout << "Centre: " << vec3_desc(_centre) << std::endl;
+	vec3 plus = make_vec3(_backup->fsx, _backup->fsy, _backup->fsz);
+	vec3_mult(&plus, _width);
+	vec3_add_to_vec3(&_centre, plus);
+	plus = make_vec3(_backup->ssx, _backup->ssy, _backup->ssz);
+	vec3_mult(&plus, _height);
+	vec3_add_to_vec3(&_centre, plus);
+
 	_px_per_m = mm;
 }
 
@@ -295,7 +432,7 @@ void SlipPanel::updateTarget(Curve *c, bool refresh)
 
 	if (_pairs.size() == 0)
 	{
-		for (size_t i = 0; i < _images.size() && i < 10; i++)
+		for (size_t i = 0; i < _images.size() && i < _maxImages; i++)
 		{
 			struct image *im = _images[i];
 
@@ -328,6 +465,11 @@ void SlipPanel::updateTarget(Curve *c, bool refresh)
 					{
 						break;
 					}
+					
+					if (get_intensity(ref) < _minIntensity)
+					{
+						continue;
+					}
 
 					double fs, ss;
 					get_detector_pos(ref, &fs, &ss);
@@ -351,10 +493,16 @@ void SlipPanel::updateTarget(Curve *c, bool refresh)
 		}
 	}
 	
-	c->clear();
-	c->setPointData(true);
+	if (c != NULL)
+	{
+		c->clear();
+		c->setPointData(true);
+	}
 	
-	for (size_t i = 0; i < _images.size() && i < 10; i++)
+	_xs.clear();
+	_ys.clear();
+	
+	for (size_t i = 0; i < _images.size() && i < _maxImages; i++)
 	{
 		struct image *im = _images[i];
 
@@ -376,13 +524,22 @@ void SlipPanel::updateTarget(Curve *c, bool refresh)
 		double pss = get_temp2(ref);
 		double dx = fs - pfs;
 		double dy = ss - pss;
+		
+		_xs.push_back(dx);
+		_ys.push_back(dy);
 
-		c->addDataPoint(dx, dy);
+		if (c != NULL)
+		{
+			c->addDataPoint(dx, dy);
+		}
 	}
 
-	CurveView *cv = c->getCurveView();
-	cv->setWindow(-10., -10., 10., 10.);
-	cv->redraw();
+	if (c != NULL)
+	{
+		CurveView *cv = c->getCurveView();
+		cv->setWindow(-10., -10., 10., 10.);
+		cv->redraw();
+	}
 }
 
 void SlipPanel::updatePowder(Curve *c, bool refresh)
@@ -398,8 +555,6 @@ void SlipPanel::updatePowder(Curve *c, bool refresh)
 	double *vals = new double[bins];
 	memset(vals, '\0', sizeof(double) * bins);
 	
-	double min_intensity = 00;
-
 	for (size_t k = 1; k < _imageStarts.size(); k++)
 	{
 		size_t start = _imageStarts[k - 1];
@@ -407,14 +562,14 @@ void SlipPanel::updatePowder(Curve *c, bool refresh)
 
 		for (size_t i = start + 1; i < end; i++)
 		{
-			if (_peaks[i].intensity < min_intensity)
+			if (_peaks[i].intensity < _minIntensity)
 			{
 				continue;
 			}
 
 			for (size_t j = start; j < i; j++)
 			{
-				if (_peaks[j].intensity < min_intensity)
+				if (_peaks[j].intensity < _minIntensity)
 				{
 					continue;
 				}
@@ -502,4 +657,11 @@ void SlipPanel::clearPanels()
 	_isSelected = tmp;
 
 	_subpanels.clear();
+}
+
+double SlipPanel::squishableTargetScore()
+{
+	updatePowder(NULL, true);
+
+	return 0;
 }
