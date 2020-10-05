@@ -154,6 +154,7 @@ void DetectorView::mouseReleaseEvent(QMouseEvent *e)
 	}
 	else
 	{
+		activePanel()->acceptNudges();
 		_selected->clearPanels();
 		updatePowderPattern();
 		updateTargetPattern();

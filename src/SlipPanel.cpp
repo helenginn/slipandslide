@@ -39,6 +39,7 @@ double SlipPanel::_minIntensity = 200;
 
 void SlipPanel::initialise()
 {
+	_target = NULL;
 	_single = false;
 	_isSelected = false;
 	_panel = NULL;
@@ -131,7 +132,6 @@ void SlipPanel::nudgePanel(SlipPanel *parent)
 	restoreFromBackup();
 
 	vec3 c = parent->centroid();
-	std::cout << vec3_desc(c) << std::endl;
 	c.x /= _panel->res;
 	c.y /= _panel->res;
 	vec3 c2 = c;
@@ -143,10 +143,16 @@ void SlipPanel::nudgePanel(SlipPanel *parent)
 	mat3x3 rot = mat3x3_rotate(parent->_alpha, 
 	                           parent->_beta, 
 	                           parent->_gamma);
+	
+	mat3x3 slide = mat3x3_rotate(parent->_horiz,
+	                             parent->_vert,
+	                             parent->_gamma);
 
 	mat3x3 transbasis = mat3x3_transpose(basis);
 	mat3x3 combine = mat3x3_mult_mat3x3(rot, transbasis);
 	combine = mat3x3_mult_mat3x3(basis, combine);
+	mat3x3 combslide = mat3x3_mult_mat3x3(slide, transbasis);
+	slide = mat3x3_mult_mat3x3(basis, combslide);
 	
 	vec3_set_length(&c2, l);
 	vec3 diff = vec3_subtract_vec3(c2, c);
@@ -157,12 +163,15 @@ void SlipPanel::nudgePanel(SlipPanel *parent)
 	vec3 rotdiff = vec3_subtract_vec3(corner, c);
 	mat3x3_mult_vec(combine, &rotdiff);
 	corner = vec3_add_vec3(c, rotdiff);
+	mat3x3_mult_vec(slide, &corner);
 	
 	vec3 fs = make_vec3(_backup->fsx, _backup->fsy, _backup->fsz);
 	vec3 ss = make_vec3(_backup->ssx, _backup->ssy, _backup->ssz);
 	
 	mat3x3_mult_vec(combine, &fs);
+	mat3x3_mult_vec(slide, &fs);
 	mat3x3_mult_vec(combine, &ss);
+	mat3x3_mult_vec(slide, &ss);
 
 	vec3 new_corner = vec3_add_vec3(corner, diff);
 
@@ -189,6 +198,8 @@ void SlipPanel::acceptNudges(SlipPanel *parent)
 	if (parent == NULL)
 	{
 		top = true;
+		double score = squishableTargetScore();
+		std::cout << "Score: " << score << std::endl;
 		parent = this;
 	}
 	
@@ -263,7 +274,6 @@ void SlipPanel::updateTmpPanelValues()
 	d = (_backup->clen + _backup->coffset);
 	_centre = make_vec3(_backup->cnx / _backup->res, 
 	                    _backup->cny / _backup->res, d);
-	std::cout << "Centre: " << vec3_desc(_centre) << std::endl;
 	vec3 plus = make_vec3(_backup->fsx, _backup->fsy, _backup->fsz);
 	vec3_mult(&plus, _width);
 	vec3_add_to_vec3(&_centre, plus);
@@ -542,14 +552,9 @@ void SlipPanel::updateTarget(Curve *c, bool refresh)
 		}
 	}
 	
-	if (c != NULL)
-	{
-		c->clear();
-		c->setPointData(true);
-	}
-	
-	_xs.clear();
-	_ys.clear();
+	c->clear();
+	c->setPointData(true);
+	_target = c;
 	
 	for (size_t i = 0; i < _images.size() && i < _maxImages; i++)
 	{
@@ -574,21 +579,12 @@ void SlipPanel::updateTarget(Curve *c, bool refresh)
 		double dx = fs - pfs;
 		double dy = ss - pss;
 		
-		_xs.push_back(dx);
-		_ys.push_back(dy);
-
-		if (c != NULL)
-		{
-			c->addDataPoint(dx, dy);
-		}
+		c->addDataPoint(dx, dy);
 	}
 
-	if (c != NULL)
-	{
-		CurveView *cv = c->getCurveView();
-		cv->setWindow(-10., -10., 10., 10.);
-		cv->redraw();
-	}
+	CurveView *cv = c->getCurveView();
+	cv->setWindow(-10., -10., 10., 10.);
+	cv->redraw();
 }
 
 void SlipPanel::updatePowder(Curve *c, bool refresh)
@@ -688,12 +684,10 @@ void SlipPanel::togglePanel(SlipPanel *other)
 	
 	if (it == _subpanels.end())
 	{
-		std::cout << "Pushing back" << std::endl;
 		addPanel(other);
 	}
 	else
 	{
-		std::cout << "Removing" << std::endl;
 		(*it)->recolour(DESELECTED_COLOUR, 0, 0);
 		_subpanels.erase(it);
 	}
@@ -712,7 +706,33 @@ void SlipPanel::clearPanels()
 
 double SlipPanel::squishableTargetScore()
 {
-	updatePowder(NULL, true);
+	if (_target == NULL)
+	{
+		return 0;
+	}
 
-	return 0;
+	double sum = 0;
+	std::vector<double> xs = _target->xs();
+	std::vector<double> ys = _target->ys();
+
+	for (size_t i = 1; i < xs.size(); i++)
+	{
+		double x1 = xs[i];
+		double y1 = ys[i];
+		
+		for (size_t j = 0; j < i; j++)
+		{
+			double x2 = xs[j];
+			double y2 = ys[j];
+			
+			double dx = x2 - x1;
+			double dy = y2 - y1;
+		
+			double dist = dx * dx + dy * dy;
+			double add = exp(-dist);
+			sum += add;
+		}
+	}
+
+	return -sum;
 }

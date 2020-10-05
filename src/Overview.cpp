@@ -58,6 +58,12 @@ Overview::Overview(QWidget *parent) : QMainWindow(parent)
 	_alphaLabel = NULL;
 	_betaSlider = NULL;
 	_betaLabel = NULL;
+	_gammaSlider = NULL;
+	_gammaLabel = NULL;
+	_horizSlider = NULL;
+	_horizLabel = NULL;
+	_vertSlider = NULL;
+	_vertLabel = NULL;
 
 	setWindowState(Qt::WindowFullScreen);
 	setWindowFlags(Qt::CustomizeWindowHint | Qt::FramelessWindowHint);
@@ -155,6 +161,45 @@ void Overview::makeAlphaSlider(QWidget *prev)
 	_alphaLabel->setText("First angle: 0°");
 }
 
+void Overview::makeVerticalSlider(QWidget *prev)
+{
+	makeSlider(&_vertSlider, prev);
+	makeSliderLabel(&_vertLabel, prev);
+	_vertSlider->setMinimum(-100);
+	_vertSlider->setMaximum(+100);
+	_vertSlider->setValue(0);
+	connect(_vertSlider, &QSlider::valueChanged, 
+	        this, &Overview::handleVertSlider);
+
+	_vertLabel->setText("Vertical slide: 0°");
+}
+
+void Overview::makeGammaSlider(QWidget *prev)
+{
+	makeSlider(&_gammaSlider, prev);
+	makeSliderLabel(&_gammaLabel, prev);
+	_gammaSlider->setMinimum(-100);
+	_gammaSlider->setMaximum(+100);
+	_gammaSlider->setValue(0);
+	connect(_gammaSlider, &QSlider::valueChanged, 
+	        this, &Overview::handleGammaSlider);
+
+	_gammaLabel->setText("Swivel slide: 0°");
+}
+
+void Overview::makeHorizontalSlider(QWidget *prev)
+{
+	makeSlider(&_horizSlider, prev);
+	makeSliderLabel(&_horizLabel, prev);
+	_horizSlider->setMinimum(-100);
+	_horizSlider->setMaximum(+100);
+	_horizSlider->setValue(0);
+	connect(_horizSlider, &QSlider::valueChanged, 
+	        this, &Overview::handleHorizSlider);
+
+	_horizLabel->setText("Horizontal slide: 0°");
+}
+
 void Overview::makeIntensitySlider(QWidget *prev)
 {
 	makeSlider(&_intensitySlider, prev);
@@ -201,6 +246,48 @@ void Overview::handleAlphaSlider(int tick)
 
 	SlipPanel *panel = _detView->activePanel();
 	SlipPanel::setAlpha(panel, a * M_PI / 180 );
+	panel->nudgePanels();
+	
+	_detView->updatePowderPattern();
+	_detView->updateTargetPattern();
+}
+
+void Overview::handleVertSlider(int tick)
+{
+	double a = tick / 50.;
+	std::string str = "Vertical slide: " + f_to_str(a, 2) + "°";
+	_vertLabel->setText(QString::fromStdString(str));
+
+	SlipPanel *panel = _detView->activePanel();
+	SlipPanel::setVert(panel, a * M_PI / 180 );
+	panel->nudgePanels();
+	
+	_detView->updatePowderPattern();
+	_detView->updateTargetPattern();
+}
+
+void Overview::handleGammaSlider(int tick)
+{
+	double a = tick / 50.;
+	std::string str = "Swivel slide: " + f_to_str(a, 2) + "°";
+	_gammaLabel->setText(QString::fromStdString(str));
+
+	SlipPanel *panel = _detView->activePanel();
+	SlipPanel::setGamma(panel, a * M_PI / 180 );
+	panel->nudgePanels();
+	
+	_detView->updatePowderPattern();
+	_detView->updateTargetPattern();
+}
+
+void Overview::handleHorizSlider(int tick)
+{
+	double a = tick / 50.;
+	std::string str = "Horizontal slide: " + f_to_str(a, 2) + "°";
+	_horizLabel->setText(QString::fromStdString(str));
+
+	SlipPanel *panel = _detView->activePanel();
+	SlipPanel::setHoriz(panel, a * M_PI / 180 );
 	panel->nudgePanels();
 	
 	_detView->updatePowderPattern();
@@ -410,6 +497,9 @@ void Overview::loadStream(Stream *stream)
 	makeRadiusSlider(_intensityLabel);
 	makeAlphaSlider(_radiusLabel);
 	makeBetaSlider(_alphaLabel);
+	makeHorizontalSlider(_betaLabel);
+	makeVerticalSlider(_horizLabel);
+	makeGammaSlider(_vertLabel);
 }
 
 void Overview::supplyImagesToPanel(SlipPanel *p)
@@ -431,5 +521,8 @@ void Overview::resetSliders()
 	_radiusSlider->setValue(0);
 	_alphaSlider->setValue(0);
 	_betaSlider->setValue(0);
+	_horizSlider->setValue(0);
+	_vertSlider->setValue(0);
+	_gammaSlider->setValue(0);
 
 }

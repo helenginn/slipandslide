@@ -48,6 +48,9 @@ public slots:
 	void handleRadiusSlider(int tick);
 	void handleAlphaSlider(int tick);
 	void handleBetaSlider(int tick);
+	void handleGammaSlider(int tick);
+	void handleHorizSlider(int tick);
+	void handleVertSlider(int tick);
 
 protected:
 	void powderGraph(QTabWidget *tab);
@@ -59,6 +62,9 @@ protected:
 	void makeRadiusSlider(QWidget *prev);
 	void makeAlphaSlider(QWidget *prev);
 	void makeBetaSlider(QWidget *prev);
+	void makeGammaSlider(QWidget *prev);
+	void makeHorizontalSlider(QWidget *prev);
+	void makeVerticalSlider(QWidget *prev);
 private:
 	void makeSlider(QSlider **handle, QWidget *prev);
 	void makeSliderLabel(QLabel **label, QWidget *prev);
@@ -77,12 +83,18 @@ private:
 	QSlider *_radiusSlider;
 	QSlider *_alphaSlider;
 	QSlider *_betaSlider;
+	QSlider *_gammaSlider;
+	QSlider *_horizSlider;
+	QSlider *_vertSlider;
 	QLabel *_distanceLabel;
 	QLabel *_imageLabel;
 	QLabel *_intensityLabel;
 	QLabel *_radiusLabel;
 	QLabel *_alphaLabel;
 	QLabel *_betaLabel;
+	QLabel *_gammaLabel;
+	QLabel *_horizLabel;
+	QLabel *_vertLabel;
 };
 
 #endif

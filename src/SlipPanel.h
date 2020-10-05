@@ -111,6 +111,36 @@ public:
 	{
 		static_cast<SlipPanel *>(object)->_beta = beta;
 	}
+	
+	static double getGamma(void *object)
+	{
+		return static_cast<SlipPanel *>(object)->_gamma;
+	}
+	
+	static void setGamma(void *object, double gamma)
+	{
+		static_cast<SlipPanel *>(object)->_gamma = gamma;
+	}
+	
+	static double getHoriz(void *object)
+	{
+		return static_cast<SlipPanel *>(object)->_horiz;
+	}
+	
+	static void setHoriz(void *object, double horiz)
+	{
+		static_cast<SlipPanel *>(object)->_horiz = horiz;
+	}
+	
+	static double getVert(void *object)
+	{
+		return static_cast<SlipPanel *>(object)->_vert;
+	}
+	
+	static void setVert(void *object, double vert)
+	{
+		static_cast<SlipPanel *>(object)->_vert = vert;
+	}
 
 	void setZ(double metres);
 	void updateTmpPanelValues();
@@ -159,10 +189,8 @@ private:
 	double _horiz;
 	double _vert;
 	
-	std::vector<double> _xs;
-	std::vector<double> _ys;
-	
 	Overview *_overview;
+	Curve *_target;
 
 	bool _isSelected;
 	bool _single;
