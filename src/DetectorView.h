@@ -43,10 +43,7 @@ public:
 	void setDistanceAllPanels(double metres);
 	SlipPanel *activePanel();
 	
-	void setOverview(Overview *over)
-	{
-		_overview = over;
-	}
+	void setOverview(Overview *over);
 	
 	void setTargetCurve(Curve *curve)
 	{

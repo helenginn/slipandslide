@@ -26,6 +26,7 @@
 #include "SlipObject.h"
 #include "Curve.h"
 #include "CurveView.h"
+#include "Overview.h"
 #include "shaders/vari_z.h"
 #include <crystfel/reflist.h>
 #include <crystfel/geometry.h>
@@ -42,6 +43,7 @@ void SlipPanel::initialise()
 	_isSelected = false;
 	_panel = NULL;
 	_backup = NULL;
+	_overview = NULL;
 	_radius = 0;
 	_horiz = 0;
 	_vert = 0;
@@ -85,8 +87,22 @@ void SlipPanel::addPanel(SlipPanel *other)
 
 void SlipPanel::makePanelBackup()
 {
-	_backup = (struct panel *)malloc(sizeof(struct panel));
+	if (_backup == NULL)
+	{
+		_backup = (struct panel *)malloc(sizeof(struct panel));
+	}
+
 	*_backup = *_panel;
+}
+
+void SlipPanel::restoreFromBackup()
+{
+	if (_backup == NULL)
+	{
+		return;
+	}
+
+	*_panel = *_backup;
 }
 
 vec3 SlipPanel::centroid()
@@ -112,7 +128,7 @@ vec3 SlipPanel::centroid()
 
 void SlipPanel::nudgePanel(SlipPanel *parent)
 {
-	*_panel = *_backup;
+	restoreFromBackup();
 
 	vec3 c = parent->centroid();
 	std::cout << vec3_desc(c) << std::endl;
@@ -132,7 +148,6 @@ void SlipPanel::nudgePanel(SlipPanel *parent)
 	mat3x3 combine = mat3x3_mult_mat3x3(rot, transbasis);
 	combine = mat3x3_mult_mat3x3(basis, combine);
 	
-
 	vec3_set_length(&c2, l);
 	vec3 diff = vec3_subtract_vec3(c2, c);
 
@@ -165,6 +180,40 @@ void SlipPanel::nudgePanel(SlipPanel *parent)
 	
 	updateTmpPanelValues();
 	updateVertices();
+}
+
+void SlipPanel::acceptNudges(SlipPanel *parent)
+{
+	bool top = false;
+
+	if (parent == NULL)
+	{
+		top = true;
+		parent = this;
+	}
+	
+	if (_panel != NULL)
+	{
+		makePanelBackup();
+		_radius = 0;
+		_alpha = 0;
+		_beta = 0;
+		_gamma = 0;
+		_horiz = 0;
+		_vert = 0;
+		updateTmpPanelValues();
+		updateVertices();
+	}
+	
+	for (size_t i = 0; i < _subpanels.size(); i++)
+	{
+		_subpanels[i]->acceptNudges(parent);
+	}
+	
+	if (top && _overview != NULL)
+	{
+		_overview->resetSliders();
+	}
 }
 
 void SlipPanel::setZ(double metres)
@@ -652,6 +701,8 @@ void SlipPanel::togglePanel(SlipPanel *other)
 
 void SlipPanel::clearPanels()
 {
+	acceptNudges();
+
 	bool tmp = _isSelected;
 	setSelected(false);
 	_isSelected = tmp;

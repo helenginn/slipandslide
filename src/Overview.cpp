@@ -426,3 +426,10 @@ void Overview::supplyImagesToPanel(SlipPanel *p)
 	_detView->updateTargetPattern();
 }
 
+void Overview::resetSliders()
+{
+	_radiusSlider->setValue(0);
+	_alphaSlider->setValue(0);
+	_betaSlider->setValue(0);
+
+}

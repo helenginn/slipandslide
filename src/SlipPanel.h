@@ -32,6 +32,7 @@ typedef struct
 } RefPeak;
 
 class Curve;
+class Overview;
 
 class SlipPanel : public SlipObject
 {
@@ -76,6 +77,11 @@ public:
 		return _isSelected;
 	}
 	
+	void setOverview(Overview *o)
+	{
+		_overview = o;
+	}
+	
 	static double getRadius(void *object)
 	{
 		return static_cast<SlipPanel *>(object)->_radius;
@@ -110,6 +116,7 @@ public:
 	void updateTmpPanelValues();
 	void updateVertices();
 	void createVertices();
+	void acceptNudges(SlipPanel *parent = NULL);
 	void nudgePanels(SlipPanel *parent = NULL);
 	
 	void getPeaksFromImage(struct image *im);
@@ -131,6 +138,7 @@ protected:
 	}
 private:
 	void makePanelBackup();
+	void restoreFromBackup();
 	void nudgePanel(SlipPanel *parent);
 	void initialise();
 	vec3 centroid();
@@ -153,6 +161,8 @@ private:
 	
 	std::vector<double> _xs;
 	std::vector<double> _ys;
+	
+	Overview *_overview;
 
 	bool _isSelected;
 	bool _single;

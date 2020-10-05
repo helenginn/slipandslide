@@ -57,12 +57,14 @@ void DetectorView::setDetector(struct detector *det)
 	_gl->preparePanels(_det->n_panels);
 	double ave_d = 0;
 	_allPanels = new SlipPanel();
+	_allPanels->setOverview(_overview);
 
 	for (int i = 0; i < _det->n_panels; i++)
 	{
 		struct panel *p = &(_det->panels[i]);
 
 		SlipPanel *spanel = new SlipPanel(p);
+		spanel->setOverview(_overview);
 		_panels.push_back(spanel);
 		_gl->addObject(spanel, false);
 
@@ -148,6 +150,7 @@ void DetectorView::mouseReleaseEvent(QMouseEvent *e)
 	{
 		_selected->togglePanel(closest);
 		_overview->supplyImagesToPanel(_selected);
+		_selected->acceptNudges();
 	}
 	else
 	{
@@ -279,4 +282,16 @@ DetectorView::~DetectorView()
 {
 	delete _gl;
 	_gl = NULL;
+}
+
+void DetectorView::setOverview(Overview *over)
+{
+	_overview = over;
+	
+	for (size_t i = 0; i < _panels.size(); i++)
+	{
+		getPanel(i)->setOverview(over);
+	}
+
+	_selected->setOverview(_overview);
 }

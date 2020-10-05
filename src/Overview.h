@@ -41,6 +41,7 @@ public:
 	void loadStream(Stream *stream);
 	void updateDistanceLabel(double mm);
 	void supplyImagesToPanel(SlipPanel *p);
+	void resetSliders();
 public slots:
 	void handleImageSlider(int tick);
 	void handleIntensitySlider(int tick);
