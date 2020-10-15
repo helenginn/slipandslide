@@ -16,6 +16,7 @@
 // 
 // Please email: vagabond @ hginn.co.uk for more details.
 
+#include "Refine.h"
 #include "DetectorView.h"
 #include "SlipPanel.h"
 #include "Overview.h"
@@ -25,11 +26,14 @@
 #include <SlipGL.h>
 #include <iostream>
 #include <QSlider>
+#include <QThread>
+#include <RefinementNelderMead.h>
 
 #define PAN_SENSITIVITY 3
 
 DetectorView::DetectorView(QWidget *p) : QWidget(p)
 {
+	_worker = NULL;
 	_mouseButton = Qt::NoButton;
 	_allPanels = NULL;
 	_selected = new SlipPanel();
@@ -51,7 +55,7 @@ void DetectorView::resizeEvent(QResizeEvent *event)
 	_gl->setGeometry(0, 0, width(), height());
 }
 
-void DetectorView::setDetector(struct detector *det)
+void DetectorView::setDetector(struct detector *det, bool refresh)
 {
 	_det = det;
 	_gl->preparePanels(_det->n_panels);
@@ -77,7 +81,7 @@ void DetectorView::setDetector(struct detector *det)
 	ave_d /= _det->n_panels;
 
 	vec3 centre = make_vec3(0, 0, ave_d);
-	std::cout << vec3_desc(centre) << std::endl;
+	std::cout << "Average distance: " << ave_d << std::endl;
 	
 	vec3 extra = centre;
 	vec3_mult(&extra, 1.1);
@@ -86,11 +90,13 @@ void DetectorView::setDetector(struct detector *det)
 	Line *l = new Line(origin, extra);
 	_gl->addObject(l, false);
 
-	_gl->changeCentre(centre);
-	_gl->draggedRightMouse(0, 100 * ave_d);
-	_gl->update();
+	if (!refresh)
+	{
+		_gl->changeCentre(centre);
+		_gl->draggedRightMouse(0, 100 * ave_d);
+	}
 	
-
+	_gl->update();
 }
 
 void DetectorView::imageToPanels(struct image *im)
@@ -208,7 +214,7 @@ void DetectorView::convertCoords(double *x, double *y)
 void DetectorView::updateSlider(QSlider *s)
 {
 	double clen = _det->defaults.clen;
-	clen *= 1e5;
+	clen *= 1e6;
 	std::cout << "Clen for slider: " <<  clen << std::endl;
 
 	s->setMinimum(clen / 1.5);
@@ -239,6 +245,23 @@ void DetectorView::setDistanceAllPanels(double metres)
 	updateTargetPattern();
 }
 
+void DetectorView::splitPanel()
+{
+	if (activePanel()->panelCount() != 1)
+	{
+		std::cout << "Too many panels selected" << std::endl;
+		return;
+	}
+	
+	SlipPanel *p = activePanel()->getPanel(0);
+	p->split(_det);
+
+	_gl->clearObjects();
+	activePanel()->clearPanels();
+	_panels.clear();
+	setDetector(_det, true);
+}
+
 void DetectorView::updateGlobalDetectorDistance()
 {
 	QSlider *s = static_cast<QSlider *>(QObject::sender());
@@ -248,7 +271,7 @@ void DetectorView::updateGlobalDetectorDistance()
 		return;
 	}
 
-	double newlen = (double)val / 1e5;
+	double newlen = (double)val / 1e6;
 	setDistanceAllPanels(newlen);
 	_overview->updateDistanceLabel(-newlen * 1000);
 }
@@ -296,3 +319,64 @@ void DetectorView::setOverview(Overview *over)
 
 	_selected->setOverview(_overview);
 }
+
+void DetectorView::clearPanelScratch()
+{
+	_allPanels->clearImageData();
+	activePanel()->clearImageData();
+	
+	for (size_t i = 0; i < _panels.size(); i++)
+	{
+		_panels[i]->clearImageData();
+	}
+
+}
+
+void DetectorView::intraPanel()
+{
+	refinePanel(true);
+}
+
+void DetectorView::refinePanel(bool intra)
+{
+	if (_worker && _worker->isRunning())
+	{
+		return;
+	}
+	
+	if (!_worker)
+	{
+		_worker = new QThread();
+	}
+	
+	_refine = new Refine();
+	_refine->moveToThread(_worker);
+	
+	_refine->setPanel(activePanel(), intra);
+	
+	connect(this, SIGNAL(refine()), _refine, SLOT(refine()));
+
+	connect(_refine, SIGNAL(resultReady()), this, SLOT(handleResults()));
+//	connect(_refine, SIGNAL(failed()), this, SLOT(handleError()));
+	_worker->start();
+
+	emit refine();
+}
+
+void DetectorView::handleResults()
+{
+	Refine*obj = static_cast<Refine *>(QObject::sender());
+
+	disconnect(this, SIGNAL(refine()), nullptr, nullptr);
+	disconnect(obj, SIGNAL(resultReady()), this, SLOT(handleResults()));
+	_worker->quit();
+	_worker->wait();
+
+	updateTargetPattern();
+}
+
+void DetectorView::interPanel()
+{
+	refinePanel(false);
+}
+

@@ -29,7 +29,9 @@
 #include <QScreen>
 #include <QSlider>
 #include <QLabel>
+#include <QPushButton>
 
+#include <gsl/gsl_linalg.h>
 #include <crystfel/stream.h>
 #include <crystfel/utils.h>
 #include <crystfel/symmetry.h>
@@ -226,7 +228,7 @@ void Overview::makeImageSlider(QWidget *prev)
 
 void Overview::handleBetaSlider(int tick)
 {
-	double b = tick / 50.;
+	double b = tick / 200.;
 	std::string str = "Second angle: " + f_to_str(b, 2) + "°";
 	_betaLabel->setText(QString::fromStdString(str));
 
@@ -240,7 +242,7 @@ void Overview::handleBetaSlider(int tick)
 
 void Overview::handleAlphaSlider(int tick)
 {
-	double a = tick / 50.;
+	double a = tick / 200.;
 	std::string str = "First angle: " + f_to_str(a, 2) + "°";
 	_alphaLabel->setText(QString::fromStdString(str));
 
@@ -254,7 +256,7 @@ void Overview::handleAlphaSlider(int tick)
 
 void Overview::handleVertSlider(int tick)
 {
-	double a = tick / 50.;
+	double a = tick / 500.;
 	std::string str = "Vertical slide: " + f_to_str(a, 2) + "°";
 	_vertLabel->setText(QString::fromStdString(str));
 
@@ -282,7 +284,7 @@ void Overview::handleGammaSlider(int tick)
 
 void Overview::handleHorizSlider(int tick)
 {
-	double a = tick / 50.;
+	double a = tick / 500.;
 	std::string str = "Horizontal slide: " + f_to_str(a, 2) + "°";
 	_horizLabel->setText(QString::fromStdString(str));
 
@@ -349,7 +351,7 @@ void Overview::targetGraph(QTabWidget *tab)
 	Curve *c = new Curve(NULL);
 
 	CurveView *cv = new CurveView(this);
-	cv->setWindow(-2, -2, 2, 2);
+	cv->setWindow(-5, -5, 5, 5);
 	cv->addCurve(c);
 	cv->redraw();
 	tab->addTab(cv, "Offset to closest prediction");
@@ -476,11 +478,7 @@ void Overview::loadStream(Stream *stream)
 	
 	_images.pop_back();
 	
-	for (size_t i = 0; i < _images.size(); i++)
-	{
-		struct image *ptr = &_images[i];
-		_detView->imageToPanels(ptr);
-	}
+	repredictImages(false);
 	
 	int w = QGuiApplication::primaryScreen()->size().width();
 	int h = QGuiApplication::primaryScreen()->size().height();
@@ -500,12 +498,255 @@ void Overview::loadStream(Stream *stream)
 	makeHorizontalSlider(_betaLabel);
 	makeVerticalSlider(_horizLabel);
 	makeGammaSlider(_vertLabel);
+	QWidget *above = splitButton(_gammaLabel);
+	refineButtons(above);
+}
+
+QWidget *Overview::splitButton(QWidget *prev)
+{
+	QPushButton *b = new QPushButton("Split panel", this);
+	QPushButton *r = b;
+	int w = QGuiApplication::primaryScreen()->size().width();
+	w -= prev->geometry().left();
+	b->setGeometry(prev->geometry().left(),
+	               prev->geometry().bottom(), w * 1/2., 30);
+	connect(b, &QPushButton::clicked, _detView, &DetectorView::splitPanel);
+	b->show();
+
+	b = new QPushButton("Repredict images", this);
+	b->setGeometry(prev->geometry().left() + w * 1/2,
+	               prev->geometry().bottom(), w * 1/2., 30);
+	connect(b, &QPushButton::clicked, this, &Overview::recalculateImages);
+	b->show();
+	
+	return r;
+}
+
+void Overview::refineButtons(QWidget *prev)
+{
+	QPushButton *b = new QPushButton("Refine (intra-panel)", this);
+	int w = QGuiApplication::primaryScreen()->size().width();
+	w -= prev->geometry().left();
+	b->setGeometry(prev->geometry().left(),
+	               prev->geometry().bottom(), w * 1/2., 30);
+	connect(b, &QPushButton::clicked, _detView, &DetectorView::intraPanel);
+	b->show();
+
+	b = new QPushButton("Refine (inter-panel)", this);
+	b->setGeometry(prev->geometry().left() + w * 1/2,
+	               prev->geometry().bottom(), w * 1/2., 30);
+	connect(b, &QPushButton::clicked, _detView, &DetectorView::interPanel);
+	b->show();
+}
+
+static int locate_peak_on_panel(double x, double y, double z, double k,
+                                struct panel *p,
+                                double *pfs, double *pss)
+{
+	double ctt, tta, phi;
+	gsl_vector *v;
+	gsl_vector *t;
+	gsl_matrix *M;
+	double fs, ss, one_over_mu;
+
+	/* Calculate 2theta (scattering angle) and azimuth (phi) */
+	tta = atan2(sqrt(x*x+y*y), k+z);
+	ctt = cos(tta);
+	phi = atan2(y, x);
+
+	/* Set up matrix equation */
+	M = gsl_matrix_alloc(3, 3);
+	v = gsl_vector_alloc(3);
+	t = gsl_vector_alloc(3);
+	if ( (M==NULL) || (v==NULL) || (t==NULL) ) {
+		ERROR("Failed to allocate vectors for prediction\n");
+		return 0;
+	}
+
+	gsl_vector_set(t, 0, sin(tta)*cos(phi));
+	gsl_vector_set(t, 1, sin(tta)*sin(phi));
+	gsl_vector_set(t, 2, ctt);
+
+	gsl_matrix_set(M, 0, 0, p->cnx);
+	gsl_matrix_set(M, 0, 1, p->fsx);
+	gsl_matrix_set(M, 0, 2, p->ssx);
+	gsl_matrix_set(M, 1, 0, p->cny);
+	gsl_matrix_set(M, 1, 1, p->fsy);
+	gsl_matrix_set(M, 1, 2, p->ssy);
+	gsl_matrix_set(M, 2, 0, p->clen*p->res);
+	gsl_matrix_set(M, 2, 1, p->fsz);
+	gsl_matrix_set(M, 2, 2, p->ssz);
+
+	if ( gsl_linalg_HH_solve(M, t, v) ) {
+		ERROR("Failed to solve prediction equation\n");
+		return 0;
+	}
+
+	one_over_mu = gsl_vector_get(v, 0);
+	fs = gsl_vector_get(v, 1) / one_over_mu;
+	ss = gsl_vector_get(v, 2) / one_over_mu;
+	gsl_vector_free(v);
+	gsl_vector_free(t);
+	gsl_matrix_free(M);
+
+	*pfs = fs;  *pss = ss;
+
+	/* Now, is this on this panel? */
+	if ( fs < 0.0 ) return 0;
+	if ( fs >= p->w ) return 0;
+	if ( ss < 0.0 ) return 0;
+	if ( ss >= p->h ) return 0;
+
+	return 1;
+}
+
+static signed int locate_peak(double x, double y, double z, double k,
+                              struct detector *det, double *pfs, double *pss)
+{
+	int i;
+
+	*pfs = -1;  *pss = -1;
+
+	for ( i=0; i<det->n_panels; i++ ) {
+
+		struct panel *p;
+
+		p = &det->panels[i];
+
+		if ( locate_peak_on_panel(x, y, z, k, p, pfs, pss) ) {
+
+			/* Woohoo! */
+			return i;
+
+		}
+
+	}
+
+	return -1;
+}
+
+void Overview::recalculateImages()
+{
+	repredictImages(true);
+}
+
+void Overview::repredictImages(bool recalc)
+{
+	struct detector *det = _detView->getDetector();
+
+	double asx, asy, asz;
+	double bsx, bsy, bsz;
+	double csx, csy, csz;
+
+	for (size_t i = 0; i < _images.size(); i++)
+	{
+		struct image *im = &_images.at(i);
+		double knom = 1.0/im->lambda;
+
+		ImageFeatureList *list = im->features;
+		for (int j = 0; j < image_feature_count(list); j++)
+		{
+			struct imagefeature *peak;
+			peak = image_get_feature(list, j);
+			peak->parent = im;
+			
+			double fs = peak->fs;
+			double ss = peak->ss;
+			if (recalc)
+			{
+				signed int pnum = locate_peak(peak->rx, peak->ry, peak->rz, 
+				                              knom, det, &fs, &ss);
+				
+				peak->fs = fs;
+				peak->ss = ss;
+				peak->p = &det->panels[0];
+
+				if (pnum >= 0)
+				{
+					peak->p = &det->panels[pnum];
+				}
+			}
+
+			struct panel *p = peak->p;
+			
+			double x = (p->cnx  + fs*p->fsx + ss*p->ssx);
+			x /= p->res;
+			double y = (p->cny  + fs*p->fsy + ss*p->ssy);
+			y /= p->res;
+			double z = (fs*p->fsz + ss*p->ssz);
+			z /= p->res;
+			z += (p->clen + p->coffset);
+
+			vec3 v = make_vec3(x, y, z);
+
+			vec3_set_length(&v, knom);
+
+			peak->rx = v.x;
+			peak->ry = v.y;
+			peak->rz = v.z - knom;
+		}
+
+		for (int j = 0; j < im->n_crystals; j++)
+		{
+			Crystal *cryst = im->crystals[j];
+			RefListIterator *it;
+			RefList *refs = crystal_get_reflections(cryst);
+			Reflection *ref = first_refl(refs, &it);
+			UnitCell *cell = crystal_get_cell(cryst);
+
+			cell_get_reciprocal(cell, &asx, &asy, &asz,
+			                    &bsx, &bsy, &bsz,
+			                    &csx, &csy, &csz);
+
+			while (true)
+			{
+				ref = (next_refl(ref, it));
+				if (ref == NULL)
+				{
+					break;
+				}
+
+				signed int h, k, l;
+				get_symmetric_indices(ref, &h, &k, &l);
+
+				double xl = h*asx + k*bsx + l*csx;
+				double yl = h*asy + k*bsy + l*csy;
+				double zl = h*asz + k*bsz + l*csz;
+
+				double fs, ss;        /* Position on detector */
+				signed int p;         /* Panel number */
+				p = locate_peak(xl, yl, zl, knom,
+				                det, &fs, &ss);
+				if (p < 0)
+				{
+					p = 0;
+				}
+
+				set_detector_pos(ref, fs, ss);
+				set_panel(ref, &det->panels[p]);
+			}
+		}
+	}
+	
+	supplyAllImages();
+}
+
+void Overview::supplyAllImages()
+{
+	_detView->clearPanelScratch();
+
+	for (size_t i = 0; i < _images.size(); i++)
+	{
+		struct image *ptr = &_images[i];
+		_detView->imageToPanels(ptr);
+	}
 }
 
 void Overview::supplyImagesToPanel(SlipPanel *p)
 {
 	p->clearImageData();
 	p->setMaxImages(_imageSlider->value());
+
 	for (size_t i = 0; i < _images.size(); i++)
 	{
 		struct image *ptr = &_images[i];

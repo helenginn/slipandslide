@@ -40,8 +40,16 @@ public:
 	void loadDetector(struct detector *det);
 	void loadStream(Stream *stream);
 	void updateDistanceLabel(double mm);
+	void supplyAllImages();
 	void supplyImagesToPanel(SlipPanel *p);
 	void resetSliders();
+
+	QWidget *splitButton(QWidget *prev);
+	
+	std::vector<struct image> *images()
+	{
+		return &_images;
+	}
 public slots:
 	void handleImageSlider(int tick);
 	void handleIntensitySlider(int tick);
@@ -51,6 +59,7 @@ public slots:
 	void handleGammaSlider(int tick);
 	void handleHorizSlider(int tick);
 	void handleVertSlider(int tick);
+	void recalculateImages();
 
 protected:
 	void powderGraph(QTabWidget *tab);
@@ -68,6 +77,8 @@ protected:
 private:
 	void makeSlider(QSlider **handle, QWidget *prev);
 	void makeSliderLabel(QLabel **label, QWidget *prev);
+	void refineButtons(QWidget *prev);
+	void repredictImages(bool recalc = true);
 
 	double targetScore();
 

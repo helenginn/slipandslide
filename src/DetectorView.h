@@ -26,9 +26,11 @@
 #include <QMouseEvent>
 
 class SlipPanel;
+class Refine;
 class QSlider;
 class Curve;
 class Overview;
+class QThread;
 
 class DetectorView : public QWidget
 {
@@ -37,7 +39,13 @@ class DetectorView : public QWidget
 public:
 	DetectorView(QWidget *parent = NULL);
 	
-	void setDetector(struct detector *det);
+	struct detector *getDetector()
+	{
+		return _det;
+	}
+	
+	void clearPanelScratch();
+	void setDetector(struct detector *det, bool refresh = false);
 	void imageToPanels(struct image *im);
 	void updateSlider(QSlider *s);
 	void setDistanceAllPanels(double metres);
@@ -61,10 +69,16 @@ public:
 	}
 
 	~DetectorView();
+signals:
+	void refine();
 public slots:
 	void updateGlobalDetectorDistance();
 	void updatePowderPattern();
 	void updateTargetPattern();
+	void splitPanel();
+	void intraPanel();
+	void interPanel();
+	void handleResults();
 	
 protected:
 	void convertCoords(double *x, double *y);
@@ -77,6 +91,8 @@ protected:
 	virtual void keyPressEvent(QKeyEvent *event);
 
 private:
+	void refinePanel(bool intra);
+
 	struct detector *_det;
 	SlipGL *_gl;
 	std::vector<SlipPanel *> _panels;
@@ -91,6 +107,9 @@ private:
 	bool _moving;
 	double _lastX;
 	double _lastY;
+	
+	Refine *_refine;
+	QThread *_worker;
 };
 
 #endif

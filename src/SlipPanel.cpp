@@ -108,7 +108,7 @@ void SlipPanel::restoreFromBackup()
 
 vec3 SlipPanel::centroid()
 {
-	if (_panel != NULL)
+	if (_single)
 	{
 		return _centre;
 	}
@@ -131,38 +131,32 @@ void SlipPanel::nudgePanel(SlipPanel *parent)
 {
 	restoreFromBackup();
 
-	vec3 c = parent->centroid();
-	c.x /= _panel->res;
-	c.y /= _panel->res;
-	vec3 c2 = c;
-	double l = vec3_length(c) + parent->_radius;
+	vec3 cent = parent->centroid();
+	/* cent now fully in metres */
+	vec3 c2 = cent;
+	double l = vec3_length(cent);
+	l += parent->_radius;
+	vec3_set_length(&c2, l);
+	vec3 diff = vec3_subtract_vec3(c2, cent);
 	
-	vec3 unit = c;
+	vec3 unit = cent;
 	vec3_set_length(&unit, 1);
 	mat3x3 basis = mat3x3_ortho_axes(unit);
-	mat3x3 rot = mat3x3_rotate(parent->_alpha, 
-	                           parent->_beta, 
-	                           parent->_gamma);
+	mat3x3 rot = mat3x3_rotate(parent->_alpha, parent->_beta, 0);
 	
-	mat3x3 slide = mat3x3_rotate(parent->_horiz,
-	                             parent->_vert,
+	mat3x3 slide = mat3x3_rotate(parent->_horiz, parent->_vert, 
 	                             parent->_gamma);
 
 	mat3x3 transbasis = mat3x3_transpose(basis);
 	mat3x3 combine = mat3x3_mult_mat3x3(rot, transbasis);
 	combine = mat3x3_mult_mat3x3(basis, combine);
-	mat3x3 combslide = mat3x3_mult_mat3x3(slide, transbasis);
-	slide = mat3x3_mult_mat3x3(basis, combslide);
 	
-	vec3_set_length(&c2, l);
-	vec3 diff = vec3_subtract_vec3(c2, c);
-
 	double d = (_backup->clen + _backup->coffset);
 	vec3 corner = make_vec3(_backup->cnx / _backup->res, 
 	                        _backup->cny / _backup->res, d);
-	vec3 rotdiff = vec3_subtract_vec3(corner, c);
+	vec3 rotdiff = vec3_subtract_vec3(corner, cent);
 	mat3x3_mult_vec(combine, &rotdiff);
-	corner = vec3_add_vec3(c, rotdiff);
+	corner = vec3_add_vec3(cent, rotdiff);
 	mat3x3_mult_vec(slide, &corner);
 	
 	vec3 fs = make_vec3(_backup->fsx, _backup->fsy, _backup->fsz);
@@ -198,8 +192,8 @@ void SlipPanel::acceptNudges(SlipPanel *parent)
 	if (parent == NULL)
 	{
 		top = true;
-		double score = squishableTargetScore();
-		std::cout << "Score: " << score << std::endl;
+//		double score = intraScore();
+//		std::cout << "Score: " << score << std::endl;
 		parent = this;
 	}
 	
@@ -275,13 +269,82 @@ void SlipPanel::updateTmpPanelValues()
 	_centre = make_vec3(_backup->cnx / _backup->res, 
 	                    _backup->cny / _backup->res, d);
 	vec3 plus = make_vec3(_backup->fsx, _backup->fsy, _backup->fsz);
-	vec3_mult(&plus, _width);
+	vec3_mult(&plus, _panel->w / _panel->res / 2);
 	vec3_add_to_vec3(&_centre, plus);
 	plus = make_vec3(_backup->ssx, _backup->ssy, _backup->ssz);
-	vec3_mult(&plus, _height);
+	vec3_mult(&plus, _panel->h / _panel->res / 2);
 	vec3_add_to_vec3(&_centre, plus);
+}
 
-	_px_per_m = mm;
+std::vector<SlipPanel *> SlipPanel::split(struct detector *det)
+{
+	_panel->w /= 2;
+	_panel->h /= 2;
+	
+	double pfsx = _panel->fsx * _panel->w;
+	double pfsy = _panel->fsy * _panel->w;
+	double pfsz = (_panel->fsz * _panel->w) / _panel->res;
+
+	double pssx = _panel->ssx * _panel->h;
+	double pssy = _panel->ssy * _panel->h;
+	double pssz = (_panel->ssz * _panel->h) / _panel->res;
+
+	std::string orig = _panel->name;
+	
+	struct panel panel_copy = *_panel;
+
+	struct panel *np = (struct panel *)realloc(det->panels,
+	                                           sizeof(struct panel)
+	                                           * (det->n_panels + 3));
+
+	if (np == NULL)// || np != det->panels)
+	{
+		std::cout << "Cannot extend panel memory" << std::endl;
+		exit(1);
+	}
+
+	int start = det->n_panels;
+	det->panels = np;
+	det->n_panels += 3;
+
+	std::vector<SlipPanel *> extras;
+	
+	int count = 0;
+	for (int i = start; i < start + 3; i++)
+	{
+		struct panel *np = &det->panels[i];
+		memcpy(np, &panel_copy, sizeof(struct panel));
+		std::string newname = orig + i_to_str(count);
+		strcpy(np->name, &newname[0]);
+		count++;
+	}
+	
+	det->panels[start].cnx += pfsx;
+	det->panels[start].cny += pfsy;
+	det->panels[start].clen += pfsz;
+
+	det->panels[start+1].cnx += pssx;
+	det->panels[start+1].cny += pssy;
+	det->panels[start+1].clen += pssz;
+	
+	det->panels[start+2].cnx += pfsx;
+	det->panels[start+2].cny += pfsy;
+	det->panels[start+2].clen += pfsz;
+
+	det->panels[start+2].cnx += pssx;
+	det->panels[start+2].cny += pssy;
+	det->panels[start+2].clen += pssz;
+
+	for (int i = start; i < start + 3; i++)
+	{
+		SlipPanel *slip = new SlipPanel(&det->panels[i]);
+		extras.push_back(slip);
+	}
+	
+	write_detector_geometry_2("ginn5.geom", "updated.geom", det,
+	                          "through slip and slide", 1);
+
+	return extras;
 }
 
 void SlipPanel::createVertices()
@@ -321,6 +384,7 @@ void SlipPanel::updateVertices()
 		return;
 	}
 
+	lockMutex();
 	pos_from_vec(_vertices[0].pos, _corner);
 	vec3 fcorn = _fs;
 	vec3_mult(&fcorn, _width);
@@ -336,6 +400,7 @@ void SlipPanel::updateVertices()
 	vec3_mult(&fcorn, _width);
 	vec3_add_to_vec3(&scorn, fcorn);
 	pos_from_vec(_vertices[3].pos, scorn);
+	unlockMutex();
 }
 
 bool SlipPanel::isValidPanelMember(struct panel *p)
@@ -415,11 +480,12 @@ void SlipPanel::updatePeaks()
 
 		peak->rx = v.x;
 		peak->ry = v.y;
-		peak->rz = v.z;
+		peak->rz = v.z - k;
 	}
 }
 
 struct imagefeature *SlipPanel::findClosestPeak(struct image *im,
+                                                struct panel *p,
                                                 double fs, double ss)
 {
 	double closest = FLT_MAX;
@@ -480,6 +546,26 @@ vec3 SlipPanel::rayTraceToPanel(struct panel *p, vec3 dir)
 
 void SlipPanel::updateTarget(Curve *c, bool refresh)
 {
+	prepareTarget(refresh);
+
+	c->clear();
+	c->setPointData(true);
+	_target = c;
+
+	for (size_t i = 0; i < _xs.size(); i++)
+	{
+		double dx = _xs[i];
+		double dy = _ys[i];
+		
+		c->addDataPoint(dx, dy);
+	}
+
+	CurveView *cv = c->getCurveView();
+	cv->redraw();
+}
+
+void SlipPanel::prepareTarget(bool refresh)
+{
 	if (refresh)
 	{
 		updatePeaks();
@@ -511,11 +597,6 @@ void SlipPanel::updateTarget(Curve *c, bool refresh)
 				{
 					continue;
 				}
-				
-				if (!isValidPanelMember(get_panel(ref)))
-				{
-					continue;
-				}
 
 				while (true)
 				{
@@ -523,6 +604,12 @@ void SlipPanel::updateTarget(Curve *c, bool refresh)
 					if (ref == NULL)
 					{
 						break;
+					}
+
+					struct panel *p = get_panel(ref);
+					if (p != NULL && !isValidPanelMember(p))
+					{
+						continue;
 					}
 					
 					if (get_intensity(ref) < _minIntensity)
@@ -533,7 +620,8 @@ void SlipPanel::updateTarget(Curve *c, bool refresh)
 					double fs, ss;
 					get_detector_pos(ref, &fs, &ss);
 
-					struct imagefeature *peak = findClosestPeak(im, fs, ss);
+					struct imagefeature *peak = findClosestPeak(im, p, 
+					                                            fs, ss);
 
 					if (peak == NULL)
 					{
@@ -552,9 +640,8 @@ void SlipPanel::updateTarget(Curve *c, bool refresh)
 		}
 	}
 	
-	c->clear();
-	c->setPointData(true);
-	_target = c;
+	_xs.clear();
+	_ys.clear();
 	
 	for (size_t i = 0; i < _images.size() && i < _maxImages; i++)
 	{
@@ -578,13 +665,9 @@ void SlipPanel::updateTarget(Curve *c, bool refresh)
 		double pss = get_temp2(ref);
 		double dx = fs - pfs;
 		double dy = ss - pss;
-		
-		c->addDataPoint(dx, dy);
+		_xs.push_back(dx);
+		_ys.push_back(dy);
 	}
-
-	CurveView *cv = c->getCurveView();
-	cv->setWindow(-10., -10., 10., 10.);
-	cv->redraw();
 }
 
 void SlipPanel::updatePowder(Curve *c, bool refresh)
@@ -704,26 +787,41 @@ void SlipPanel::clearPanels()
 	_subpanels.clear();
 }
 
-double SlipPanel::squishableTargetScore()
+double SlipPanel::interScore()
 {
-	if (_target == NULL)
-	{
-		return 0;
-	}
+	nudgePanels();
+	prepareTarget(true);
 
 	double sum = 0;
-	std::vector<double> xs = _target->xs();
-	std::vector<double> ys = _target->ys();
-
-	for (size_t i = 1; i < xs.size(); i++)
+	for (size_t i = 1; i < _xs.size(); i++)
 	{
-		double x1 = xs[i];
-		double y1 = ys[i];
+		double x1 = _xs[i];
+		double y1 = _ys[i];
+
+		double dist = x1 * x1 + y1 * y1;
+		double add = exp(-dist);
+		sum += add;
+	}
+
+	std::cout << -sum << std::endl;
+	return -sum;
+}
+
+double SlipPanel::intraScore()
+{
+	nudgePanels();
+	prepareTarget(true);
+
+	double sum = 0;
+	for (size_t i = 1; i < _xs.size(); i++)
+	{
+		double x1 = _xs[i];
+		double y1 = _ys[i];
 		
 		for (size_t j = 0; j < i; j++)
 		{
-			double x2 = xs[j];
-			double y2 = ys[j];
+			double x2 = _xs[j];
+			double y2 = _ys[j];
 			
 			double dx = x2 - x1;
 			double dy = y2 - y1;
@@ -734,5 +832,9 @@ double SlipPanel::squishableTargetScore()
 		}
 	}
 
+	std::cout << -sum << std::endl;
 	return -sum;
 }
+
+
+

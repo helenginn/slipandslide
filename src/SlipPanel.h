@@ -45,6 +45,16 @@ public:
 	
 	void clearPanels();
 	
+	SlipPanel *getPanel(int i)
+	{
+		return _subpanels[i];
+	}
+	
+	struct panel *getSinglePanel()
+	{
+		return _panel;
+	}
+	
 	void clearImageData()
 	{
 		_peaks.clear();
@@ -146,6 +156,9 @@ public:
 	void updateTmpPanelValues();
 	void updateVertices();
 	void createVertices();
+
+	std::vector<SlipPanel *> split(struct detector *det);
+
 	void acceptNudges(SlipPanel *parent = NULL);
 	void nudgePanels(SlipPanel *parent = NULL);
 	
@@ -153,13 +166,26 @@ public:
 	
 	void updatePowder(Curve *c, bool refresh = true);
 	void updateTarget(Curve *c, bool refresh = true);
+	void prepareTarget(bool refresh);
 
-	double squishableTargetScore();
+	static double getIntraScore(void *object)
+	{
+		return static_cast<SlipPanel *>(object)->intraScore();
+	}
+
+	static double getInterScore(void *object)
+	{
+		return static_cast<SlipPanel *>(object)->interScore();
+	}
+
 protected:
 	struct imagefeature *findClosestPeak(struct image *im,
+	                                     struct panel *p,
 	                                     double fs, double ss);
 	vec3 rayTraceToPanel(struct panel *p, vec3 dir);
 	bool isValidPanelMember(struct panel *p);
+	double intraScore();
+	double interScore();
 	void updatePeaks();
 
 	struct panel *panelPtr()
@@ -179,7 +205,6 @@ private:
 	vec3 _centre;      /* x,y in pixels, z in metres */
 	double _width;     /* in pixels, fs multiplier */
 	double _height;    /* in pixels, ss multiplier */
-	double _px_per_m;  /* pixels per metre */
 	
 	double _alpha;
 	double _beta;
@@ -199,6 +224,7 @@ private:
 	struct panel *_panel;
 	struct panel *_backup;
 	std::vector<SlipPanel *> _subpanels;
+	std::vector<double> _xs, _ys;
 
 	std::vector<struct imagefeature> _peaks;
 	std::vector<struct image *> _images;
