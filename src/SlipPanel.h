@@ -152,7 +152,7 @@ public:
 		static_cast<SlipPanel *>(object)->_vert = vert;
 	}
 
-	void setZ(double metres);
+	void addToZ(double metres);
 	void updateTmpPanelValues();
 	void updateVertices();
 	void createVertices();
@@ -167,6 +167,9 @@ public:
 	void updatePowder(Curve *c, bool refresh = true);
 	void updateTarget(Curve *c, bool refresh = true);
 	void prepareTarget(bool refresh);
+
+	void cOffsetToLen(double defDist);
+	void cLenToOffset(double defDist);
 
 	static double getIntraScore(void *object)
 	{
@@ -206,6 +209,7 @@ private:
 	vec3 _centre;      /* x,y in pixels, z in metres */
 	double _width;     /* in pixels, fs multiplier */
 	double _height;    /* in pixels, ss multiplier */
+	double _origDist;
 	
 	double _alpha;
 	double _beta;

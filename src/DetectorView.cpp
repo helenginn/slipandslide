@@ -33,6 +33,8 @@
 
 DetectorView::DetectorView(QWidget *p) : QWidget(p)
 {
+	_origDist = 0;
+	_calcDist = 0;
 	_worker = NULL;
 	_mouseButton = Qt::NoButton;
 	_allPanels = NULL;
@@ -97,6 +99,10 @@ void DetectorView::setDetector(struct detector *det, bool refresh)
 
 	vec3 centre = make_vec3(0, 0, ave_d);
 	std::cout << "Average distance: " << ave_d << std::endl;
+	_calcDist = ave_d / 1000;
+	
+	_origDist = _det->defaults.clen;
+	_lastMetres = _origDist;
 	
 	vec3 extra = centre;
 	vec3_mult(&extra, 1.1);
@@ -229,7 +235,7 @@ void DetectorView::convertCoords(double *x, double *y)
 
 void DetectorView::updateSlider(QSlider *s)
 {
-	double clen = _det->defaults.clen;
+	double clen = _calcDist;
 	clen *= 1e7;
 	std::cout << "Clen for slider: " <<  clen << std::endl;
 
@@ -237,7 +243,7 @@ void DetectorView::updateSlider(QSlider *s)
 	s->setMaximum(clen * 1.5);
 	
 	s->setValue(clen);
-	_overview->updateDistanceLabel(-_det->defaults.clen * 1000);
+	_overview->updateDistanceLabel(-_calcDist * 1000);
 
 	connect(s, &QSlider::valueChanged, this,
 	        &DetectorView::updateGlobalDetectorDistance);
@@ -247,14 +253,17 @@ void DetectorView::updateSlider(QSlider *s)
 
 void DetectorView::setDistanceAllPanels(double metres)
 {
+	double add = metres - _lastMetres;
+
 	for (int i = 0; i < _det->n_panels; i++)
 	{
 		SlipPanel *p = getPanel(i);
-		p->setZ(metres);
+		p->addToZ(add);
 		p->updateTmpPanelValues();
 		p->updateVertices();
 	}
 	
+	_lastMetres = metres;
 	std::cout << -metres * 1000 << " mm." << std::endl;
 	
 	updatePowderPattern();

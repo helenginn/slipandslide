@@ -171,7 +171,7 @@ void SlipPanel::nudgePanel(SlipPanel *parent)
 
 	vec3 new_corner = vec3_add_vec3(corner, diff);
 
-	_panel->coffset = new_corner.z - _panel->clen;
+	_panel->clen = new_corner.z;
 	_panel->cnx = new_corner.x * _panel->res;
 	_panel->cny = new_corner.y * _panel->res;
 
@@ -223,10 +223,22 @@ void SlipPanel::acceptNudges(SlipPanel *parent)
 	}
 }
 
-void SlipPanel::setZ(double metres)
+void SlipPanel::addToZ(double metres)
 {
-	_panel->clen = metres;
+	_panel->clen += metres;
 	makePanelBackup();
+}
+
+void SlipPanel::cLenToOffset(double defDist)
+{
+	_panel->coffset = _panel->clen - defDist;
+	_panel->clen = defDist;
+}
+
+void SlipPanel::cOffsetToLen(double defDist)
+{
+	_panel->clen = defDist + _panel->coffset;
+	_panel->coffset = 0;
 }
 
 void SlipPanel::nudgePanels(SlipPanel *parent)
@@ -823,6 +835,7 @@ double SlipPanel::intraScore()
 	nudgePanels();
 	prepareTarget(true);
 
+	double modifier = 3;
 	double sum = 0;
 	for (size_t i = 1; i < _xs.size(); i++)
 	{
@@ -838,6 +851,7 @@ double SlipPanel::intraScore()
 			double dy = y2 - y1;
 		
 			double dist = dx * dx + dy * dy;
+			dist /= modifier;
 			double add = exp(-2 * dist);
 			sum += add;
 		}

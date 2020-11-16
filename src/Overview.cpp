@@ -587,6 +587,13 @@ void Overview::writeGeometry()
 		std::cout << "No geometry file loaded." << std::endl;
 	}
 
+	double d = _detView->originalDistance();
+	for (int i = 0; i < _detector->n_panels; i++)
+	{
+		SlipPanel *p = _detView->getPanel(i);
+		p->cLenToOffset(d);
+	}
+
 	std::string path = getPath(_geomstr);
 	std::string name = getFilename(_geomstr);
 	std::string newname = path + "/s-and-s-" + name;
@@ -594,6 +601,13 @@ void Overview::writeGeometry()
 	                          _detector,
 	                          "refined by slip-and-slide algorithm, "\
 	                          "J. Synchrotron Rad. (2017). 24, 1152-1162", 1);
+
+
+	for (int i = 0; i < _detector->n_panels; i++)
+	{
+		SlipPanel *p = _detView->getPanel(i);
+		p->cOffsetToLen(d);
+	}
 	
 	QMessageBox msgBox;
 	msgBox.setText(QString::fromStdString("Written out geometry file to " 
@@ -770,8 +784,8 @@ void Overview::repredictImages(bool recalc)
 				signed int pnum = locate_peak(peak->rx, peak->ry, peak->rz, 
 				                              knom, det, &fs, &ss);
 				
-				peak->fs = fs;
-				peak->ss = ss;
+//				peak->fs = fs;
+//				peak->ss = ss;
 				peak->p = &det->panels[0];
 
 				if (pnum >= 0)

@@ -51,6 +51,11 @@ public:
 	void setDistanceAllPanels(double metres);
 	SlipPanel *activePanel();
 	
+	double originalDistance()
+	{
+		return _origDist;
+	}
+	
 	void setOverview(Overview *over);
 	
 	void setTargetCurve(Curve *curve)
@@ -98,6 +103,8 @@ private:
 	std::vector<SlipPanel *> _panels;
 	SlipPanel *_allPanels;
 	SlipPanel *_selected;
+	double _origDist;
+	double _calcDist;
 	
 	Overview *_overview;
 	Curve *_powderCurve;
@@ -107,6 +114,7 @@ private:
 	bool _moving;
 	double _lastX;
 	double _lastY;
+	double _lastMetres;
 	
 	Refine *_refine;
 	QThread *_worker;
