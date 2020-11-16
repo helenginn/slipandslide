@@ -61,7 +61,12 @@ public slots:
 	void handleVertSlider(int tick);
 	void recalculateImages();
 
+	void loadStreamFile();
+	void loadGeometry();
+	void writeGeometry();
+
 protected:
+	void makeMenu();
 	void powderGraph(QTabWidget *tab);
 	void targetGraph(QTabWidget *tab);
 
@@ -87,6 +92,7 @@ private:
 	CurveView *_targetView;
 	DetectorView *_detView;
 	struct detector *_detector;
+	std::string _geomstr;
 
 	QSlider *_distanceSlider;
 	QSlider *_imageSlider;

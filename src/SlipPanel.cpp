@@ -34,6 +34,8 @@
 #define DESELECTED_COLOUR (0.5)
 #define SELECTED_COLOUR (1.0)
 
+using namespace Helen3D;
+
 size_t SlipPanel::_maxImages = 20;
 double SlipPanel::_minIntensity = 200;
 
@@ -169,7 +171,7 @@ void SlipPanel::nudgePanel(SlipPanel *parent)
 
 	vec3 new_corner = vec3_add_vec3(corner, diff);
 
-	_panel->clen = new_corner.z;
+	_panel->coffset = new_corner.z - _panel->clen;
 	_panel->cnx = new_corner.x * _panel->res;
 	_panel->cny = new_corner.y * _panel->res;
 
@@ -431,7 +433,7 @@ void SlipPanel::getPeaksFromImage(struct image *im)
 		struct imagefeature *peak;
 		peak = image_get_feature(list, i);
 		peak->parent = im;
-
+		
 		if (isValidPanelMember(peak->p))
 		{
 			_peaks.push_back(*peak);
@@ -440,17 +442,90 @@ void SlipPanel::getPeaksFromImage(struct image *im)
 
 	size_t end = _peaks.size();
 	
-	if (end != start)
-	{
-		_images.push_back(im);
+	_images.push_back(im);
 
-		if (start == 0)
-		{
-			_imageStarts.push_back(start);
-		}
-		
-		_imageStarts.push_back(end);
+	if (start == 0)
+	{
+		_imageStarts.push_back(start);
 	}
+
+	_imageStarts.push_back(end);
+}
+
+void SlipPanel::updatePairs()
+{
+	_pairs.clear();
+	int count = 0;
+	
+	double asx, asy, asz;
+	double bsx, bsy, bsz;
+	double csx, csy, csz;
+
+	for (size_t i = 0; i < _images.size() && i < _maxImages; i++)
+	{
+		struct image *im = _images[i];
+
+		for (int j = 0; j < im->n_crystals; j++)
+		{
+			Crystal *cryst = im->crystals[j];
+			RefListIterator *it;
+			RefList *refs = crystal_get_reflections(cryst);
+			Reflection *ref = first_refl(refs, &it);
+			UnitCell *cell = crystal_get_cell(cryst);
+
+			cell_get_reciprocal(cell, &asx, &asy, &asz,
+			                    &bsx, &bsy, &bsz,
+			                    &csx, &csy, &csz);
+
+			if (ref == NULL)
+			{
+				continue;
+			}
+
+			while (true)
+			{
+				ref = (next_refl(ref, it));
+				if (ref == NULL)
+				{
+					break;
+				}
+
+				if (get_intensity(ref) < _minIntensity)
+				{
+					continue;
+				}
+				
+				count++;
+
+				struct panel *p = get_panel(ref);
+				if (p != NULL && !isValidPanelMember(p))
+				{
+					continue;
+				}
+
+				double fs, ss;
+				get_detector_pos(ref, &fs, &ss);
+
+				struct imagefeature *peak = findClosestPeak(im, p, 
+				                                            fs, ss);
+
+				if (peak == NULL)
+				{
+					continue;
+				}
+
+				set_temp1(ref, peak->fs);
+				set_temp2(ref, peak->ss);
+
+				RefPeak rp;
+				rp.ref = ref;
+				rp.peak = peak;
+				_pairs.push_back(rp);
+			}
+		}
+	}
+
+	std::cout << "Tested: " << count << std::endl;
 }
 
 void SlipPanel::updatePeaks()
@@ -490,11 +565,11 @@ struct imagefeature *SlipPanel::findClosestPeak(struct image *im,
 {
 	double closest = FLT_MAX;
 	struct imagefeature *peak = NULL;
-	const double max = 20;
+	const double max = 5;
 
 	for (size_t i = 0; i < _peaks.size(); i++)
 	{
-		if (_peaks[i].parent != im)
+		if (_peaks[i].parent != im || _peaks[i].p != p)
 		{
 			continue;
 		}
@@ -570,74 +645,10 @@ void SlipPanel::prepareTarget(bool refresh)
 	{
 		updatePeaks();
 	}
-	
-	double asx, asy, asz;
-	double bsx, bsy, bsz;
-	double csx, csy, csz;
 
 	if (_pairs.size() == 0)
 	{
-		for (size_t i = 0; i < _images.size() && i < _maxImages; i++)
-		{
-			struct image *im = _images[i];
-
-			for (int j = 0; j < im->n_crystals; j++)
-			{
-				Crystal *cryst = im->crystals[j];
-				RefListIterator *it;
-				RefList *refs = crystal_get_reflections(cryst);
-				Reflection *ref = first_refl(refs, &it);
-				UnitCell *cell = crystal_get_cell(cryst);
-
-				cell_get_reciprocal(cell, &asx, &asy, &asz,
-				                    &bsx, &bsy, &bsz,
-				                    &csx, &csy, &csz);
-
-				if (ref == NULL)
-				{
-					continue;
-				}
-
-				while (true)
-				{
-					ref = (next_refl(ref, it));
-					if (ref == NULL)
-					{
-						break;
-					}
-
-					struct panel *p = get_panel(ref);
-					if (p != NULL && !isValidPanelMember(p))
-					{
-						continue;
-					}
-					
-					if (get_intensity(ref) < _minIntensity)
-					{
-						continue;
-					}
-
-					double fs, ss;
-					get_detector_pos(ref, &fs, &ss);
-
-					struct imagefeature *peak = findClosestPeak(im, p, 
-					                                            fs, ss);
-
-					if (peak == NULL)
-					{
-						continue;
-					}
-					
-					set_temp1(ref, peak->fs);
-					set_temp2(ref, peak->ss);
-
-					RefPeak rp;
-					rp.ref = ref;
-					rp.peak = peak;
-					_pairs.push_back(rp);
-				}
-			}
-		}
+		updatePairs();
 	}
 	
 	_xs.clear();
@@ -799,7 +810,7 @@ double SlipPanel::interScore()
 		double y1 = _ys[i];
 
 		double dist = x1 * x1 + y1 * y1;
-		double add = exp(-dist);
+		double add = exp(-2 * dist);
 		sum += add;
 	}
 
@@ -827,7 +838,7 @@ double SlipPanel::intraScore()
 			double dy = y2 - y1;
 		
 			double dist = dx * dx + dy * dy;
-			double add = exp(-dist);
+			double add = exp(-2 * dist);
 			sum += add;
 		}
 	}

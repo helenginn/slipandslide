@@ -21,6 +21,8 @@
 #include "shaders/fImage.h"
 #include "shaders/vari_z.h"
 
+using namespace Helen3D;
+
 Line::Line(vec3 start, vec3 end)
 {
 	_start = start;

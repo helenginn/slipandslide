@@ -1,5 +1,5 @@
-// Slip n Slide
-// Copyright (C) 2017-2018 Helen Ginn
+// slipnslide
+// Copyright (C) 2019 Helen Ginn
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -16,23 +16,17 @@
 // 
 // Please email: vagabond @ hginn.co.uk for more details.
 
-#include <crystfel/detector.h>
-#include <crystfel/stream.h>
-#include "Overview.h"
-#include <iostream>
-#include <QApplication>
+#include "Speckle.h"
 
-int main(int argc, char *argv[])
+Speckle::Speckle(QWidget *parent) : QWidget(parent)
 {
-	std::cout << "Qt version: " << qVersion() << std::endl;
+	_gl = new SlipGL(this);
+	_gl->show();
 
-	QApplication app(argc, argv);
-	setlocale(LC_NUMERIC, "C");
-	srand(time(NULL));
+	resize(500, 400);
+}
 
-	Overview o;
-
-	int status = app.exec();
-
-	return status;
+void Speckle::resizeEvent(QResizeEvent *event)
+{
+	_gl->setGeometry(0, 0, width(), height());
 }

@@ -187,6 +187,7 @@ protected:
 	double intraScore();
 	double interScore();
 	void updatePeaks();
+	void updatePairs();
 
 	struct panel *panelPtr()
 	{

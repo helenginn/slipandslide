@@ -53,9 +53,9 @@ void Refine::refineInter()
 	                 SlipPanel::setHoriz, 0.001, 0.000005);
 	nm->addParameter(_p, SlipPanel::getVert,
 	                 SlipPanel::setVert, 0.001, 0.000005);
-	nm->addParameter(_p, SlipPanel::getGamma,
-	                 SlipPanel::setGamma, 0.001, 0.000005);
-	nm->setCycles(30);
+//	nm->addParameter(_p, SlipPanel::getGamma,
+//	                 SlipPanel::setGamma, 0.001, 0.000005);
+	nm->setCycles(40);
 	nm->refine();
 	
 	emit resultReady();
@@ -66,12 +66,12 @@ void Refine::refineIntra()
 	RefinementNelderMead *nm = new RefinementNelderMead();
 	nm->setEvaluationFunction(SlipPanel::getIntraScore, _p);
 	nm->addParameter(_p, SlipPanel::getRadius,
-	                 SlipPanel::setRadius, 0.001, 0.000005);
+	                 SlipPanel::setRadius, 0.0002, 0.000001);
 	nm->addParameter(_p, SlipPanel::getAlpha,
-	                 SlipPanel::setAlpha, 0.001, 0.000005);
+	                 SlipPanel::setAlpha, 0.0005, 0.000001);
 	nm->addParameter(_p, SlipPanel::getBeta,
-	                 SlipPanel::setBeta, 0.001, 0.000005);
-	nm->setCycles(30);
+	                 SlipPanel::setBeta, 0.0005, 0.000001);
+	nm->setCycles(40);
 	nm->refine();
 	
 	emit resultReady();

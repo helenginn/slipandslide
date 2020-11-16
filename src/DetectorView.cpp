@@ -45,6 +45,7 @@ DetectorView::DetectorView(QWidget *p) : QWidget(p)
 	_gl = new SlipGL(this);
 	_gl->show();
 	_gl->rotate(0, M_PI, 0);
+	_det = NULL;
 
 	resize(1000, 1000);
 	setFocus();
@@ -57,11 +58,25 @@ void DetectorView::resizeEvent(QResizeEvent *event)
 
 void DetectorView::setDetector(struct detector *det, bool refresh)
 {
+	for (size_t i = 0; i < _panels.size(); i++)
+	{
+		_gl->removeObject(_panels[i]);
+	}
+
+	_panels.clear();
+
+	if (_det != NULL)
+	{
+		free_detector_geometry(_det);
+	}
+
 	_det = det;
+
 	_gl->preparePanels(_det->n_panels);
 	double ave_d = 0;
 	_allPanels = new SlipPanel();
 	_allPanels->setOverview(_overview);
+	_selected->clearPanels();
 
 	for (int i = 0; i < _det->n_panels; i++)
 	{
@@ -92,8 +107,9 @@ void DetectorView::setDetector(struct detector *det, bool refresh)
 
 	if (!refresh)
 	{
+		centre.z *= -1;
 		_gl->changeCentre(centre);
-		_gl->draggedRightMouse(0, 100 * ave_d);
+//		_gl->draggedRightMouse(0, 100 * ave_d);
 	}
 	
 	_gl->update();
@@ -214,7 +230,7 @@ void DetectorView::convertCoords(double *x, double *y)
 void DetectorView::updateSlider(QSlider *s)
 {
 	double clen = _det->defaults.clen;
-	clen *= 1e6;
+	clen *= 1e7;
 	std::cout << "Clen for slider: " <<  clen << std::endl;
 
 	s->setMinimum(clen / 1.5);
@@ -258,7 +274,6 @@ void DetectorView::splitPanel()
 
 	_gl->clearObjects();
 	activePanel()->clearPanels();
-	_panels.clear();
 	setDetector(_det, true);
 }
 
@@ -271,7 +286,7 @@ void DetectorView::updateGlobalDetectorDistance()
 		return;
 	}
 
-	double newlen = (double)val / 1e6;
+	double newlen = (double)val / 1e7;
 	setDistanceAllPanels(newlen);
 	_overview->updateDistanceLabel(-newlen * 1000);
 }

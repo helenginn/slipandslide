@@ -21,12 +21,15 @@
 #include "DetectorView.h"
 #include <FileReader.h>
 #include <CurveView.h>
+#include <Dialogue.h>
 #include <Curve.h>
-#include <QTabWidget>
 #include <crystfel/image.h>
 #include <iostream>
+#include <QTabWidget>
+#include <QMenuBar>
 #include <QGuiApplication>
 #include <QScreen>
+#include <QMessageBox>
 #include <QSlider>
 #include <QLabel>
 #include <QPushButton>
@@ -69,21 +72,111 @@ Overview::Overview(QWidget *parent) : QMainWindow(parent)
 
 	setWindowState(Qt::WindowFullScreen);
 	setWindowFlags(Qt::CustomizeWindowHint | Qt::FramelessWindowHint);
+	makeMenu();
+
+	int w = QGuiApplication::primaryScreen()->size().width();
+	int h = QGuiApplication::primaryScreen()->size().height();
+	int mh = menuBar()->height();
+
+	_detView = new DetectorView(this);
+	_detView->setGeometry(0, mh, w * 2. / 3., h - mh);
+	_detView->setOverview(this);
+	_detView->show();
 	
 	showFullScreen();
 }
 
-void Overview::loadDetector(struct detector *det)
+void Overview::makeMenu()
 {
+	QMenu *structure = menuBar()->addMenu(tr("&File"));
+	QAction *act = structure->addAction(tr("Load geometry file"));
+	connect(act, &QAction::triggered, this, &Overview::loadGeometry);
+	act = structure->addAction(tr("Load stream file"));
+	connect(act, &QAction::triggered, this, &Overview::loadStreamFile);
+}
+
+void Overview::loadGeometry()
+{
+	std::string geomstr = openDialogue(this, "Choose geometry file", 
+	                                   "CrystFEL geometry file (*.geom)");
+
+	struct detector *det = get_detector_geometry(geomstr.c_str(), NULL);
+
+	if (det == NULL)
+	{
+		QMessageBox msgBox;
+		msgBox.setText(tr("Loading geometry file failed."));
+		msgBox.exec();
+		return;
+	}
+
+	bool already = (_detector != NULL);
+
+	loadDetector(det);
+	repredictImages(true);
+	
+	_geomstr = geomstr;
+	
+	if (already)
+	{
+		_detView->updatePowderPattern();
+		_detView->updateTargetPattern();
+		return;
+	}
+	
 	int w = QGuiApplication::primaryScreen()->size().width();
 	int h = QGuiApplication::primaryScreen()->size().height();
 
-	_detView = new DetectorView(this);
-	_detView->setGeometry(0, 0, w * 2. / 3., h);
-	_detView->setOverview(this);
+	QTabWidget *tabs = new QTabWidget(this);
+	tabs->setGeometry(w * 2. / 3., 0, w * 1. / 3., h * 1. / 3.);
+	tabs->show();
+
+	powderGraph(tabs);
+	targetGraph(tabs);
+	makeDistanceSlider(tabs);
+	makeImageSlider(_distanceLabel);
+	makeIntensitySlider(_imageLabel);
+	makeRadiusSlider(_intensityLabel);
+	makeAlphaSlider(_radiusLabel);
+	makeBetaSlider(_alphaLabel);
+	makeHorizontalSlider(_betaLabel);
+	makeVerticalSlider(_horizLabel);
+	makeGammaSlider(_vertLabel);
+	QWidget *above = splitButton(_gammaLabel);
+	refineButtons(above);
+}
+
+void Overview::loadStreamFile()
+{
+	if (_detView->getDetector() == NULL)
+	{
+		QMessageBox msgBox;
+		msgBox.setText(tr("Need to load geometry file first."));
+		msgBox.exec();
+		return;
+	}
+
+	std::string streamstr = openDialogue(this, "Choose geometry file", 
+	                                   "CrystFEL geometry file (*.geom)");
+
+	Stream *stream = open_stream_for_read(streamstr.c_str());
+
+	if (stream == NULL)
+	{
+		QMessageBox msgBox;
+		msgBox.setText(tr("Loading stream file failed."));
+		msgBox.exec();
+		return;
+	}
+
+	loadStream(stream);
+	close_stream(stream);
+}
+
+void Overview::loadDetector(struct detector *det)
+{
 	_detector = det;
 	_detView->setDetector(det);
-	_detView->show();
 }
 
 void Overview::makeSlider(QSlider **handle, QWidget *prev)
@@ -415,13 +508,13 @@ void Overview::loadStream(Stream *stream)
 
 	while (true)
 	{
-//		ReadStreamFlags f = STREAM_READ_REFLECTIONS | STREAM_READ_UNITCELL;
 		if (read_chunk(stream, next) != 0 )
 		{
 			break;
 		}
 
 		struct image *cur = &_images[_images.size() - 1];
+		cur->spectrum = spectrum_generate_gaussian(cur->lambda, cur->bw);
 		RefList *as;
 
 		for (int i = 0; i<cur->n_crystals; i++)
@@ -456,6 +549,7 @@ void Overview::loadStream(Stream *stream)
 			image->n_crystals = 1;
 			image->crystals = &crystals[n_crystals];
 
+
 			/* This is the raw list of reflections */
 			cr_refl = crystal_get_reflections(cr);
 
@@ -477,49 +571,66 @@ void Overview::loadStream(Stream *stream)
 	}
 	
 	_images.pop_back();
-	
-	repredictImages(false);
-	
-	int w = QGuiApplication::primaryScreen()->size().width();
-	int h = QGuiApplication::primaryScreen()->size().height();
 
-	QTabWidget *tabs = new QTabWidget(this);
-	tabs->setGeometry(w * 2. / 3., 0, w * 1. / 3., h * 1. / 3.);
-	tabs->show();
-
-	powderGraph(tabs);
-	targetGraph(tabs);
-	makeDistanceSlider(tabs);
 	makeImageSlider(_distanceLabel);
-	makeIntensitySlider(_imageLabel);
-	makeRadiusSlider(_intensityLabel);
-	makeAlphaSlider(_radiusLabel);
-	makeBetaSlider(_alphaLabel);
-	makeHorizontalSlider(_betaLabel);
-	makeVerticalSlider(_horizLabel);
-	makeGammaSlider(_vertLabel);
-	QWidget *above = splitButton(_gammaLabel);
-	refineButtons(above);
+
+	repredictImages(false);
+
+	_detView->updatePowderPattern();
+	_detView->updateTargetPattern();
+}
+
+void Overview::writeGeometry()
+{
+	if (_geomstr.length() == 0)
+	{
+		std::cout << "No geometry file loaded." << std::endl;
+	}
+
+	std::string path = getPath(_geomstr);
+	std::string name = getFilename(_geomstr);
+	std::string newname = path + "/s-and-s-" + name;
+	int error = write_detector_geometry_2(_geomstr.c_str(), newname.c_str(),
+	                          _detector,
+	                          "refined by slip-and-slide algorithm, "\
+	                          "J. Synchrotron Rad. (2017). 24, 1152-1162", 1);
+	
+	QMessageBox msgBox;
+	msgBox.setText(QString::fromStdString("Written out geometry file to " 
+	                                      + newname));
+	msgBox.exec();
 }
 
 QWidget *Overview::splitButton(QWidget *prev)
 {
+	/*
 	QPushButton *b = new QPushButton("Split panel", this);
 	QPushButton *r = b;
 	int w = QGuiApplication::primaryScreen()->size().width();
 	w -= prev->geometry().left();
-	b->setGeometry(prev->geometry().left(),
+	b->setGeometry(prev->geometry().left() + w * 1/2,
 	               prev->geometry().bottom(), w * 1/2., 30);
 	connect(b, &QPushButton::clicked, _detView, &DetectorView::splitPanel);
 	b->show();
+	*/
+
+	QPushButton *b = new QPushButton("Write geometry file", this);
+	QPushButton *r = b;
+	int w = QGuiApplication::primaryScreen()->size().width();
+	w -= prev->geometry().left();
+	b->setGeometry(prev->geometry().left() + w * 1/2,
+	               prev->geometry().bottom(), w * 1/2., 30);
+	connect(b, &QPushButton::clicked, this, &Overview::writeGeometry);
+	b->show();
 
 	b = new QPushButton("Repredict images", this);
-	b->setGeometry(prev->geometry().left() + w * 1/2,
+	b->setGeometry(prev->geometry().left(),
 	               prev->geometry().bottom(), w * 1/2., 30);
 	connect(b, &QPushButton::clicked, this, &Overview::recalculateImages);
 	b->show();
+
 	
-	return r;
+	return b;
 }
 
 void Overview::refineButtons(QWidget *prev)
@@ -641,6 +752,7 @@ void Overview::repredictImages(bool recalc)
 	for (size_t i = 0; i < _images.size(); i++)
 	{
 		struct image *im = &_images.at(i);
+		im->det = det;
 		double knom = 1.0/im->lambda;
 
 		ImageFeatureList *list = im->features;
@@ -652,6 +764,7 @@ void Overview::repredictImages(bool recalc)
 			
 			double fs = peak->fs;
 			double ss = peak->ss;
+
 			if (recalc)
 			{
 				signed int pnum = locate_peak(peak->rx, peak->ry, peak->rz, 
@@ -759,6 +872,11 @@ void Overview::supplyImagesToPanel(SlipPanel *p)
 
 void Overview::resetSliders()
 {
+	if (_radiusSlider == NULL)
+	{
+		return;
+	}
+
 	_radiusSlider->setValue(0);
 	_alphaSlider->setValue(0);
 	_betaSlider->setValue(0);
