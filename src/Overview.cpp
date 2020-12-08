@@ -19,6 +19,7 @@
 #include "Overview.h"
 #include "SlipPanel.h"
 #include "DetectorView.h"
+#include "Splattice.h"
 #include <FileReader.h>
 #include <CurveView.h>
 #include <Dialogue.h>
@@ -77,11 +78,16 @@ Overview::Overview(QWidget *parent) : QMainWindow(parent)
 	int w = QGuiApplication::primaryScreen()->size().width();
 	int h = QGuiApplication::primaryScreen()->size().height();
 	int mh = menuBar()->height();
+	
+	double cw = std::max(mh, w * 2. / 3., 1000);
+	double hw = std::max(h - mh, 1000);
 
 	_detView = new DetectorView(this);
-	_detView->setGeometry(0, mh, w * 2. / 3., h - mh);
+	_detView->setGeometry(0, mh, cw, hw);
 	_detView->setOverview(this);
 	_detView->show();
+	
+	_splattice = new Splattice(this);
 	
 	showFullScreen();
 }
@@ -866,6 +872,12 @@ void Overview::supplyAllImages()
 	{
 		struct image *ptr = &_images[i];
 		_detView->imageToPanels(ptr);
+	}
+
+	for (size_t i = 0; i < _images.size(); i++)
+	{
+		struct image *ptr = &_images[i];
+		_splattice->addImage(ptr);
 	}
 }
 

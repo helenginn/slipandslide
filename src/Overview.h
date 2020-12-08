@@ -93,6 +93,7 @@ private:
 	DetectorView *_detView;
 	struct detector *_detector;
 	std::string _geomstr;
+	Splattice *_splattice;
 
 	QSlider *_distanceSlider;
 	QSlider *_imageSlider;

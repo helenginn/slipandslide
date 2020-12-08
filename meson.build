@@ -20,5 +20,6 @@ executable('slipnslide',
 'src/Refine.cpp', 
 'src/Overview.cpp', 
 'src/SlipPanel.cpp', 
+'src/Splattice.cpp', 
 moc_files, dependencies: [hdf5, qt5_dep, gsl, crystfel, helen3d_dep], install: true)
 
