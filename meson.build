@@ -2,7 +2,7 @@ project('slipnslide', 'cpp')
 qt5 = import('qt5')
 crystfel = dependency('crystfel')
 gsl = dependency('gsl')
-hdf5 = dependency('hdf5')
+hdf5 = dependency('hdf5', language: 'cpp')
 qt5_dep = dependency('qt5', modules: ['Core', 'Gui', 'Widgets'])
 helen3d_dep = dependency('helen3d')
 
