@@ -73,21 +73,22 @@ Overview::Overview(QWidget *parent) : QMainWindow(parent)
 
 	setWindowState(Qt::WindowFullScreen);
 	setWindowFlags(Qt::CustomizeWindowHint | Qt::FramelessWindowHint);
+	
+	_splattice = new Splattice(this);
+
 	makeMenu();
 
-	int w = QGuiApplication::primaryScreen()->size().width();
-	int h = QGuiApplication::primaryScreen()->size().height();
+	double w = QGuiApplication::primaryScreen()->size().width();
+	double h = QGuiApplication::primaryScreen()->size().height();
 	int mh = menuBar()->height();
 	
-	double cw = std::max(mh, w * 2. / 3., 1000);
-	double hw = std::max(h - mh, 1000);
+	double cw = std::max(w * 2. / 3., 1000.);
+	double hw = std::max(h - mh, 1000.);
 
 	_detView = new DetectorView(this);
 	_detView->setGeometry(0, mh, cw, hw);
 	_detView->setOverview(this);
 	_detView->show();
-	
-	_splattice = new Splattice(this);
 	
 	showFullScreen();
 }
@@ -99,6 +100,12 @@ void Overview::makeMenu()
 	connect(act, &QAction::triggered, this, &Overview::loadGeometry);
 	act = structure->addAction(tr("Load stream file"));
 	connect(act, &QAction::triggered, this, &Overview::loadStreamFile);
+
+	QMenu *splattice = menuBar()->addMenu(tr("&Splattice"));
+
+	act = splattice->addAction(tr("Run splattice"));
+	connect(act, &QAction::triggered, 
+	        _splattice, &Splattice::runSplattice);
 }
 
 void Overview::loadGeometry()
@@ -603,7 +610,7 @@ void Overview::writeGeometry()
 	std::string path = getPath(_geomstr);
 	std::string name = getFilename(_geomstr);
 	std::string newname = path + "/s-and-s-" + name;
-	int error = write_detector_geometry_2(_geomstr.c_str(), newname.c_str(),
+	write_detector_geometry_2(_geomstr.c_str(), newname.c_str(),
 	                          _detector,
 	                          "refined by slip-and-slide algorithm, "\
 	                          "J. Synchrotron Rad. (2017). 24, 1152-1162", 1);
@@ -635,7 +642,6 @@ QWidget *Overview::splitButton(QWidget *prev)
 	*/
 
 	QPushButton *b = new QPushButton("Write geometry file", this);
-	QPushButton *r = b;
 	int w = QGuiApplication::primaryScreen()->size().width();
 	w -= prev->geometry().left();
 	b->setGeometry(prev->geometry().left() + w * 1/2,

@@ -24,6 +24,7 @@
 #include <crystfel/stream.h>
 #include <crystfel/image.h>
 
+class Splattice;
 class QSlider;
 class QLabel;
 class DetectorView;

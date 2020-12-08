@@ -20,18 +20,25 @@
 #define __slipnslide__splattice__
 
 #include <crystfel/image.h>
+#include <vector>
+#include <QObject>
 
 class Overview;
 
-class Splattice
+class Splattice : public QObject
 {
+Q_OBJECT
 public:
 	Splattice(Overview *view);
 
 	void addImage(struct image *im);
+
+public slots:
+	void runSplattice();
 private:
 	Overview *_view;
 
+	std::vector<struct imagefeature *> _peaks;
 };
 
 #endif
